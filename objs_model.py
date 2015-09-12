@@ -1,0 +1,412 @@
+import pickle
+from gi.repository import Gtk
+import datetime
+import os
+
+
+class Spendable(object):
+	pass
+
+class Futter(Spendable):
+	def __init__(self,name,menge,preis_pro_menge,datum):
+		self.name=name
+		self.menge=menge
+		self.preis_pro_menge=preis_pro_menge
+		self.datum=datum
+	def __str__(self):
+		s= self.name+": "+str(self.menge)+" Einheiten mit "+str(self.preis_pro_menge)+" Euro pro Einheit am "+str(self.datum)+" gefüttert"
+		return s
+	def __add__(self,obj):
+	 	return self.menge*self.preis_pro_menge + obj
+	def __radd__(self,obj):
+		return self.menge*self.preis_pro_menge + obj
+	
+class Medikament(Spendable):
+	def __init__(self,name,menge,preis_pro_menge,datum):
+		self.name=name
+		self.menge=menge/1000
+		self.preis_pro_menge=preis_pro_menge
+		self.datum=datum
+	def __str__(self):
+		s= self.name+": "+str(self.menge)+" Einheiten mit "+str(self.preis_pro_menge)+" Euro pro Einheit am "+str(self.datum)+" verabreicht"
+		return s
+	def __add__(self,obj):
+		return self.menge*self.preis_pro_menge + obj
+	def __radd__(self,obj):
+		return self.menge*self.preis_pro_menge + obj
+
+class Volk(object):
+	def __init__(self,name,ort,groesse):
+		self.name=name
+		self.ort=ort
+		self.groesse=groesse
+		self.futterlist=[]
+		self.medikamentenlist=[]
+	def __str__(self):
+		return self.name+": steht in "+self.ort+" ist "+str(self.groesse)+" Rähmchen groß"
+	def fuettern(self,futter):
+		self.futterlist.append(futter)
+	def medikament_geben(self,medikament):
+		self.medikamentenlist.append(medikament)
+	
+class Volksverwaltung(object):
+	def __init__(self,voelker=None):
+		if voelker==None:
+			self.voelker=[]
+		else:
+			self.voelker=voelker
+	def add_volk(self,volk):
+		self.voelker.append(volk)
+	def del_volk(self,pos):
+		del(self.voelker[pos])
+class MainController(object):
+	def __init__(self):
+		self.t1_model=None
+		self.t2_model=None
+		self.t3_model=None
+		self.t4_model=None
+		self.t1=None
+		self.t2=None
+		self.t3=None
+		self.t4=None
+		self.add_food_button=None
+		self.add_med_button=None
+		self.del_button=None
+		self.add_button=None
+		self.food_name_ent=None
+		self.food_size_ent=None
+		self.food_cost_ent=None
+		self.med_name_ent=None
+		self.med_size_ent=None
+		self.med_cost_ent=None
+		self.volksverwaltung=None
+		self.new_name_ent=None
+		self.new_ort_ent=None
+		self.new_size_ent=None
+
+
+		self.stat_food_ent=None
+		self.stat_med_ent=None
+		self.stat_all_ent=None
+
+		self.savename=os.getenv("HOME")+"/.BeeKeeper/bees.pik"
+
+	def build_t1_model(self):
+		for volk in self.volksverwaltung.voelker:
+			self.t1_model.append((volk.name,volk.ort,volk.groesse))
+### ACTIONS ###
+	def name_changed(self,widget,path,text):
+		self.t1_model[path][0]=text
+		self.volksverwaltung.voelker[int(path)].name=text
+	def ort_changed(self,widget,path,text):
+		self.t1_model[path][1]=text
+		self.volksverwaltung.voelker[int(path)].ort=text
+	def groesse_changed(self,widget,path,text):
+		self.t1_model[path][2]=int(text)
+		self.volksverwaltung.voelker[int(path)].groesse=int(text)
+	def save_and_exit(self,*args):
+		pickle.dump(self.volksverwaltung,open(self.savename,"wb"))
+		Gtk.main_quit(*args)
+	def del_volk(self,button):
+		sel=self.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		name=self.t1_model[row][0]
+		for volk in self.volksverwaltung.voelker:
+			if(volk.name==name):
+				break
+			place+=1
+		del(self.volksverwaltung.voelker[place])
+		del(self.t1_model[row])
+	def add_volk(self,button):
+		name=self.new_name_ent.get_text()
+		if(name==""):
+			self.new_name_ent.set_text("Name benötigt")
+		ort=self.new_ort_ent.get_text()
+		if(ort==""):
+			self.new_ort_ent.set_text("Ort benötigt")
+		groesse_s=self.new_size_ent.get_text()
+		groesse=0
+		try:
+			groesse=int(groesse_s)
+		except:
+			self.new_size_ent.set_text("Größe als Zahl angeben")
+			return
+		newVolk=Volk(name,ort,groesse)
+		self.volksverwaltung.add_volk(newVolk)
+		self.t1_model.append((newVolk.name,newVolk.ort,newVolk.groesse))
+
+	def add_food(self,button):
+		name=self.food_name_ent.get_text()
+		if(name==""):
+			self.food_name_ent.set_text("Name benötigt")
+			return
+		menge_s=self.food_size_ent.get_text()
+		menge=0.0
+		try:
+			menge=float(menge_s)
+		except:
+			self.food_size_ent.set_text("Menge als Zahl angeben")
+			return
+		preis_s=self.food_cost_ent.get_text()
+		preis=0.0
+		try:
+			preis=float(preis_s)
+		except:
+			self.food_cost_ent.set_text("Preis als Zahl angeben")
+			return
+		sel=self.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.t1_model[row][0]
+		for volk in self.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		self.volksverwaltung.voelker[place].fuettern(Futter(name,menge,preis,datetime.date.today()))
+	def add_med(self,button):
+		name=self.med_name_ent.get_text()
+		if(name==""):
+			self.med_name_ent.set_text("Name benötigt")
+			return
+		menge_s=self.med_size_ent.get_text()
+		menge=0.0
+		try:
+			menge=float(menge_s)
+		except:
+			self.med_size_ent.set_text("Menge als Zahl angeben")
+			return
+		preis_s=self.med_cost_ent.get_text()
+		preis=0.0
+		try:
+			preis=float(preis_s)
+		except:
+			self.med_cost_ent.set_text("Preis als Zahl angeben")
+			return
+		sel=self.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.t1_model[row][0]
+		for volk in self.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		self.volksverwaltung.voelker[place].medikament_geben(Medikament(name,menge,preis,datetime.date.today()))
+
+	def build_food_stats(self,ent):
+		self.show_food_stats(self.stat_food_ent.get_text())
+	def build_med_stats(self,ent):
+		self.show_med_stats(self.stat_med_ent.get_text())
+	def build_all_stats(self,ent):
+		self.show_all_stats(self.stat_all_ent.get_text())
+	def show_all_stats(self,dfrom):
+		self.t4_model=Gtk.ListStore(str,float)
+		self.t4.set_model(self.t4_model)
+		da=None
+		try:
+			da=datetime.datetime.strptime(dfrom,"%d-%m-%y").date()
+		except BaseException as e:
+			self.stat_all_ent.set_text("Datum als DD-MM-JJ angeben")
+			print(e)
+			return
+
+		sel=self.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.t1_model[row][0]
+		for volk in self.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		meds=self.volksverwaltung.voelker[place].medikamentenlist
+		foods=self.volksverwaltung.voelker[place].futterlist
+		stat_foods=[]
+		for futter in foods:
+			if(futter.datum>=da):
+				stat_foods.append(futter)
+		stat_meds=[]
+		for med in meds:
+			if(med.datum>=da):
+				stat_meds.append(med)
+		all_stats=stat_foods+stat_meds
+		for stat in all_stats:
+			self.t4_model.append((stat.name,stat.preis_pro_menge*stat.menge))
+		self.t4_model.append(("ges",sum(all_stats)))
+
+	def show_food_stats(self,dfrom):
+		self.t2_model=Gtk.ListStore(str,float,float)
+		self.t2.set_model(self.t2_model)
+		da=None
+		try:
+			da=datetime.datetime.strptime(dfrom,"%d-%m-%y").date()
+		except BaseException as e:
+			self.stat_food_ent.set_text("Datum als DD-MM-JJ angeben")
+			print(e)
+			return
+
+		sel=self.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.t1_model[row][0]
+		for volk in self.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		foods=self.volksverwaltung.voelker[place].futterlist
+		stat_foods=[]
+		for futter in foods:
+			if(futter.datum>=da):
+				stat_foods.append(futter)
+		for food in stat_foods:
+			self.t2_model.append((food.name,food.preis_pro_menge,food.menge))
+	def show_med_stats(self,dfrom):
+		self.t3_model=Gtk.ListStore(str,float,float,str)
+		self.t3.set_model(self.t3_model)
+		da=None
+		try:
+			da=datetime.datetime.strptime(dfrom,"%d-%m-%y").date()
+		except BaseException as e:
+			self.stat_med_ent.set_text("Datum als DD-MM-JJ angeben")
+			print(e)
+			return
+
+		sel=self.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.t1_model[row][0]
+		for volk in self.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		meds=self.volksverwaltung.voelker[place].medikamentenlist
+		stat_meds=[]
+		for med in meds:
+			if(med.datum>=da):
+				stat_meds.append(med)
+		for med in stat_meds:
+			self.t3_model.append((med.name,med.preis_pro_menge,med.menge,med.datum.strftime("%d-%m-%j")))
+		return
+
+
+
+
+	def build_from_builder(self,b):
+		self.add_food_button=b.get_object("button1")
+		self.add_med_button=b.get_object("button2")
+		self.del_button=b.get_object("button3")
+		self.add_button=b.get_object("button4")
+		self.build_treeview1(b.get_object("treeview1"))
+		self.build_treeview2(b.get_object("treeview2"))
+		self.build_treeview3(b.get_object("treeview3"))
+		self.build_treeview4(b.get_object("treeview4"))
+		self.food_name_ent=b.get_object("entry1")
+		self.food_size_ent=b.get_object("entry2")
+		self.food_cost_ent=b.get_object("entry3")
+		self.med_name_ent=b.get_object("entry4")
+		self.med_size_ent=b.get_object("entry5")
+		self.med_cost_ent=b.get_object("entry6")
+		self.new_name_ent=b.get_object("entry7")
+		self.new_ort_ent= b.get_object("entry8")
+		self.new_size_ent=b.get_object("entry9")
+
+		self.stat_food_ent=b.get_object("entry10")
+		self.stat_med_ent=b.get_object("entry11")
+		self.stat_all_ent=b.get_object("entry12")
+
+		self.stat_food_ent.connect("activate",self.build_food_stats)
+		self.stat_med_ent.connect("activate",self.build_med_stats)
+		self.stat_all_ent.connect("activate",self.build_all_stats)
+
+		self.del_button.connect("clicked",self.del_volk)
+		self.add_button.connect("clicked",self.add_volk)
+		self.add_food_button.connect("clicked",self.add_food)
+		self.add_med_button.connect("clicked",self.add_med)
+
+	def build_treeview1(self,treeview):
+		global t1_model
+		t1_renderer1 = Gtk.CellRendererText(editable=True)
+		t1_renderer2 = Gtk.CellRendererText(editable=True)
+		t1_renderer3 = Gtk.CellRendererText(editable=True)
+
+		t1_renderer1.connect("edited",self.name_changed)
+		t1_renderer2.connect("edited",self.ort_changed)
+		t1_renderer3.connect("edited",self.groesse_changed)
+
+		t1_col1=Gtk.TreeViewColumn("Name",t1_renderer1,text=0)
+		t1_col2=Gtk.TreeViewColumn("Ort",t1_renderer2,text=1)
+		t1_col3=Gtk.TreeViewColumn("Größe in Rähmchen",t1_renderer3,text=2)
+
+		t1_model=Gtk.ListStore(str,str,int)
+
+		treeview.append_column(t1_col1)
+		treeview.append_column(t1_col2)
+		treeview.append_column(t1_col3)
+
+		self.t1_model= t1_model
+		treeview.set_model(t1_model)
+		self.t1=treeview
+		if(self.volksverwaltung!=None):
+			self.build_t1_model()
+	def build_treeview2(self,treeview):
+		t2_renderer1=Gtk.CellRendererText()
+		t2_renderer2=Gtk.CellRendererText()
+		t2_renderer3=Gtk.CellRendererText()
+
+		t2_col1=Gtk.TreeViewColumn("Posten",t2_renderer1,text=0)
+		t2_col2=Gtk.TreeViewColumn("Preis",t2_renderer2,text=1)
+		t2_col3=Gtk.TreeViewColumn("Menge",t2_renderer3,text=2)
+
+		treeview.append_column(t2_col1)
+		treeview.append_column(t2_col2)
+		treeview.append_column(t2_col3)
+
+		t2_model=Gtk.ListStore(str,float,float)
+		treeview.set_model(t2_model)
+		self.t2=treeview
+		self.t2_model= t2_model
+	def build_treeview3(self,treeview):
+
+		t3_renderer1=Gtk.CellRendererText()
+		t3_renderer2=Gtk.CellRendererText()
+		t3_renderer3=Gtk.CellRendererText()
+		t3_renderer4=Gtk.CellRendererText()
+
+		t3_col1=Gtk.TreeViewColumn("Posten",t3_renderer1,text=0)
+		t3_col2=Gtk.TreeViewColumn("Preis",t3_renderer2,text=1)
+		t3_col3=Gtk.TreeViewColumn("Menge",t3_renderer3,text=2)
+		t3_col4=Gtk.TreeViewColumn("Datum",t3_renderer4,text=3)
+
+		treeview.append_column(t3_col1)
+		treeview.append_column(t3_col2)
+		treeview.append_column(t3_col3)
+		treeview.append_column(t3_col4)
+
+		t3_model=Gtk.ListStore(str,float,float,str)
+		treeview.set_model(t3_model)
+		self.t3=treeview
+		self.t3_model= t3_model
+	def build_treeview4(self,treeview):
+		t4_renderer1=Gtk.CellRendererText()
+		t4_renderer2=Gtk.CellRendererText()
+
+		t4_col1=Gtk.TreeViewColumn("Posten",t4_renderer1,text=0)
+		t4_col2=Gtk.TreeViewColumn("Preis",t4_renderer2,text=1)
+
+		treeview.append_column(t4_col1)
+		treeview.append_column(t4_col2)
+
+		t4_model=Gtk.ListStore(str,int)
+		treeview.set_model(t4_model)
+		self.t4=treeview
+		self.t4_model= t4_model
+	def load_volksverwaltung(self):
+		volksverwaltung=None
+		try:
+			volksverwaltung=pickle.load(open(self.savename,"rb"))
+		except BaseException as e:
+			print(e)
+		if(volksverwaltung==None):
+			volksverwaltung=Volksverwaltung()
+			volksverwaltung.add_volk(Volk("TestVolk","Haus",10))
+		self.volksverwaltung= volksverwaltung
+		
