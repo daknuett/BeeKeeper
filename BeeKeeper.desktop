@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=BeeKeeper
+Exec=BeeKeeper
+Icon=/etc/BeeKeeper/micon.png
+Categories=Gtk;Utility;
