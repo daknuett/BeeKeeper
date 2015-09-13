@@ -1,6 +1,6 @@
 #!/bin/bash
 
-files=(main.py objs_model.py objs_main.py BeeKeeperMain.glade icon.png )
+files=(main.py objs_model.py objs_main.py BeeKeeperMain.glade micon.png )
 yes="j"
 
 echo "Installing Beekeeper..."
@@ -33,12 +33,30 @@ echo "making DIR ~/.BeeKeeper ..."
 mkdir ~/.BeeKeeper
 echo "done."
 
-echo "Copying files to ~/.BeeKeeper..."
+if [ -e /etc/BeeKeeper ]
+then
+	echo "Path  /etc/BeeKeeper/  exists already is BeeKeeper installed?"
+	echo "If you want to install BeeKeeper anyway remove /etc/BeeKeeper/"
+	echo "remove /etc/BeeKeeper [j/N]?"
+	read input
+	if [[ "$input" == "$yes" ]]
+	then
+		sudo rm -r /etc/BeeKeeper
+	else
+		exit 1
+	fi
+fi
+
+echo "making DIR /etc/BeeKeeper"
+sudo mkdir /etc/BeeKeeper
+echo "done."
+
+echo "Copying files to /etc/BeeKeeper..."
 
 for file in ${files[*]}
 do
 	echo $file
-	cp $file ~/.BeeKeeper/$file
+	sudo cp $file /etc/BeeKeeper/$file
 done
 echo "done."
 
