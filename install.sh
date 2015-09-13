@@ -51,6 +51,7 @@ echo "making DIR /etc/BeeKeeper"
 sudo mkdir /etc/BeeKeeper
 echo "done."
 
+
 echo "Copying files to /etc/BeeKeeper..."
 
 for file in ${files[*]}
@@ -67,6 +68,10 @@ echo "done."
 echo "generating executable ..."
 sudo chmod +x /usr/bin/BeeKeeper || { echo "Failed!";exit 1; }
 echo "done."
+
+echo "copiyng over desktop file ..."
+sudo cp BeeKeeper.desktop /usr/share/applications
+echo "done"
 
 
 echo "done."
