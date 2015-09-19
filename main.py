@@ -3,6 +3,7 @@ from objs_main import *
 from objs_model import *
 import pickle
 import os
+import sys
 
 def show_about():
 	global builder
@@ -18,7 +19,7 @@ builder=Gtk.Builder()
 if( not sys.argv[1]=="--local"):
 	builder.add_from_file("/etc/BeeKeeper/BeeKeeperMain.glade")
 else:
-	builder.add_from_file("~/.BeeKeeper/etc/BeeKeeperMain.glade")
+	builder.add_from_file(os.path.expanduser("~/.BeeKeeper/etc/BeeKeeperMain.glade"))
 
 w=builder.get_object("applicationwindow1")
 

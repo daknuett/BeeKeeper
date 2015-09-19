@@ -1,7 +1,7 @@
 #!/bin/bash
 
 pyfiles=(main.py objs_model.py objs_main.py )
-etcfile=(BeeKeeperMain.glade micon.png )
+etcfiles=(BeeKeeperMain.glade micon.png )
 yes="j"
 
 echo "Installing Beekeeper..."
@@ -15,10 +15,12 @@ then
 	then 
 		echo "Path  ~/.BeeKeeper/  exists already is BeeKeeper installed?"
 		echo "Do you want to install BeeKeeper anyway?"
+		echo "this will remove the current ~/.BeeKeeper."
 		echo "continue installing BeeKeeper [j/N]?"
 		read input
 		if [[ "$input" == "$yes" ]]
 		then
+			rm -r ~/.BeeKeeper
 			echo "continue"
 		else
 			echo "exiting."
@@ -66,13 +68,21 @@ then
 	chmod +x ~/.BeeKeeper/usr/BeeKeeper
 	echo "done."
 
+	echo "extending .desktop file ..."
+	cp BeeKeeper.desktop.local BeeKeeper.desktop
+	echo "Icon=$HOME/.BeeKeeper/etc/micon.png">>BeeKeeper.desktop
+	echo "Exec=$HOME/.BeeKeeper/usr/BeeKeeper">>BeeKeeper.desktop
+	echo "done."
+
 	echo "copying .desktop file ... "
 	if [ -z ~/.local/share/applications ]
 	then 
 		echo "~/.local/share/applications does not exist. cannot install."
 		exit 1
 	fi
-	cp BeeKeeper.desktop.local ~/.local/share/applications/BeeKeeper.desktop
+	cp BeeKeeper.desktop ~/.local/share/applications/BeeKeeper.desktop
+	chmod +x ~/.local/share/applications/BeeKeeper.desktop
+	rm BeeKeeper.desktop
 	echo "done."
 
 	

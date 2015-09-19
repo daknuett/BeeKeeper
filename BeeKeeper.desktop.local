@@ -2,7 +2,5 @@
 Type=Application
 Encoding=UTF-8
 Name=BeeKeeper
-Exec=~/.BeeKeeper/usr/BeeKeeper
-Icon=~/.BeeKeeper/etc/micon.png
-Categories=Gtk;Utility;
+Categories=Utility;
 
