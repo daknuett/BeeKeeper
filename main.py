@@ -4,6 +4,11 @@ from objs_model import *
 import pickle
 import os
 
+def show_about():
+	global builder
+	about=builder.get_object("aboutdialog1")
+	about.show_all()
+
 if(not os.path.exists(os.getenv("HOME")+"/.BeeKeeper")):
 	print("~/.BeeKeeper does not exist, generating it")
 	os.mkdir(os.path.expanduser("~/.BeeKeeper"),mode=0o755)

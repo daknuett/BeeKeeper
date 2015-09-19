@@ -17,7 +17,7 @@ class Futter(Spendable):
 		s= self.name+": "+str(self.menge)+" Einheiten mit "+str(self.preis_pro_menge)+" Euro pro Einheit am "+str(self.datum)+" gefüttert"
 		return s
 	def __add__(self,obj):
-	 	return self.menge*self.preis_pro_menge + obj
+		return self.menge*self.preis_pro_menge + obj
 	def __radd__(self,obj):
 		return self.menge*self.preis_pro_menge + obj
 	
@@ -48,6 +48,10 @@ class Volk(object):
 		self.futterlist.append(futter)
 	def medikament_geben(self,medikament):
 		self.medikamentenlist.append(medikament)
+	def change_size_by_date(self,date,size):
+		for futter in self.futterlist:
+			if(futter.datum==datetime.datetime.strptime(date,"%d-%m-%y").date()):
+				futter.menge=size
 	
 class Volksverwaltung(object):
 	def __init__(self,voelker=None):
@@ -98,6 +102,9 @@ class MainController(object):
 	def name_changed(self,widget,path,text):
 		self.t1_model[path][0]=text
 		self.volksverwaltung.voelker[int(path)].name=text
+	def food_val_changed(self,widget,path,text):
+		self.t2_model[path][2]=float(text)
+		self.volksverwaltung.voelker[self.food_stats_volk_index].change_size_by_date(self.t2_model[path][3],float(self.t2_model[path][2]))
 	def ort_changed(self,widget,path,text):
 		self.t1_model[path][1]=text
 		self.volksverwaltung.voelker[int(path)].ort=text
@@ -205,6 +212,7 @@ class MainController(object):
 		da=None
 		try:
 			da=datetime.datetime.strptime(dfrom,"%d-%m-%y").date()
+			print(da)
 		except BaseException as e:
 			self.stat_all_ent.set_text("Datum als DD-MM-JJ angeben")
 			print(e)
@@ -234,7 +242,7 @@ class MainController(object):
 		self.t4_model.append(("ges",sum(all_stats)))
 
 	def show_food_stats(self,dfrom):
-		self.t2_model=Gtk.ListStore(str,float,float)
+		self.t2_model=Gtk.ListStore(str,float,float,str)
 		self.t2.set_model(self.t2_model)
 		da=None
 		try:
@@ -252,13 +260,15 @@ class MainController(object):
 			if(volk.name==vname):
 				break
 			place+=1
+		self.food_stats_volk_index=place
 		foods=self.volksverwaltung.voelker[place].futterlist
 		stat_foods=[]
 		for futter in foods:
 			if(futter.datum>=da):
 				stat_foods.append(futter)
+		self.stat_foods=stat_foods
 		for food in stat_foods:
-			self.t2_model.append((food.name,food.preis_pro_menge,food.menge))
+			self.t2_model.append((food.name,food.preis_pro_menge,food.menge,food.datum.strftime("%d-%m-%y")))
 	def show_med_stats(self,dfrom):
 		self.t3_model=Gtk.ListStore(str,float,float,str)
 		self.t3.set_model(self.t3_model)
@@ -284,7 +294,7 @@ class MainController(object):
 			if(med.datum>=da):
 				stat_meds.append(med)
 		for med in stat_meds:
-			self.t3_model.append((med.name,med.preis_pro_menge,med.menge,med.datum.strftime("%d-%m-%j")))
+			self.t3_model.append((med.name,med.preis_pro_menge,med.menge,med.datum.strftime("%d-%m-%y")))
 		return
 
 
@@ -350,17 +360,22 @@ class MainController(object):
 	def build_treeview2(self,treeview):
 		t2_renderer1=Gtk.CellRendererText()
 		t2_renderer2=Gtk.CellRendererText()
-		t2_renderer3=Gtk.CellRendererText()
+		t2_renderer3=Gtk.CellRendererText(editable=True)
+		t2_renderer4=Gtk.CellRendererText()
+
+		t2_renderer3.connect("edited",self.food_val_changed)
 
 		t2_col1=Gtk.TreeViewColumn("Posten",t2_renderer1,text=0)
 		t2_col2=Gtk.TreeViewColumn("Preis",t2_renderer2,text=1)
 		t2_col3=Gtk.TreeViewColumn("Menge",t2_renderer3,text=2)
+		t2_col4=Gtk.TreeViewColumn("Datum",t2_renderer4,text=3)
 
 		treeview.append_column(t2_col1)
 		treeview.append_column(t2_col2)
 		treeview.append_column(t2_col3)
+		treeview.append_column(t2_col4)
 
-		t2_model=Gtk.ListStore(str,float,float)
+		t2_model=Gtk.ListStore(str,float,float,str)
 		treeview.set_model(t2_model)
 		self.t2=treeview
 		self.t2_model= t2_model
