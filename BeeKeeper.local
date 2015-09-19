@@ -1,0 +1,5 @@
+#!/bin/bash
+
+python3 ~/.BeeKeeper/pys/main.py --local
+
+

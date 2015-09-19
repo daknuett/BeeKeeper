@@ -15,7 +15,11 @@ if(not os.path.exists(os.getenv("HOME")+"/.BeeKeeper")):
 
 
 builder=Gtk.Builder()
-builder.add_from_file("/etc/BeeKeeper/BeeKeeperMain.glade")
+if( not sys.argv[1]=="--local"):
+	builder.add_from_file("/etc/BeeKeeper/BeeKeeperMain.glade")
+else:
+	builder.add_from_file("~/.BeeKeeper/etc/BeeKeeperMain.glade")
+
 w=builder.get_object("applicationwindow1")
 
 
