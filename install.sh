@@ -8,13 +8,12 @@ echo "Installing Beekeeper..."
 if [ -e ~/.BeeKeeper/ ]
 then 
 	echo "Path  ~/.BeeKeeper/  exists already is BeeKeeper installed?"
-	echo "If you want to install BeeKeeper anyway remove ~/.BeeKeeper/"
-	echo "remove ~/.BeeKeeper [j/N]?"
+	echo "Do you want to install BeeKeeper anyway?"
+	echo "continue installing BeeKeeper [j/N]?"
 	read input
 	if [[ "$input" == "$yes" ]]
 	then
-		rm -r ~/.BeeKeeper
-		echo "removed ~/.BeeKeeper"
+		echo "continue"
 	else
 		echo "exiting."
 		exit 1
