@@ -141,20 +141,23 @@
             <child>
               <object class="GtkMenuItem" id="menuitem4">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
+                <property name="has_default">True</property>
                 <property name="label" translatable="yes">_Hilfe</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="menu3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="take_focus">False</property>
                     <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem10">
-                        <property name="label">gtk-about</property>
+                        <property name="label">gtk-info</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
+                        <signal name="activate" handler="show_about" swapped="no"/>
+                        <signal name="select" handler="show_about" swapped="no"/>
                       </object>
                     </child>
                   </object>
