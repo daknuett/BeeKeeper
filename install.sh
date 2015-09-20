@@ -1,7 +1,7 @@
 #!/bin/bash
 
 pyfiles=(main.py objs_model.py objs_main.py )
-etcfiles=(BeeKeeperMain.glade micon.png )
+etcfiles=(BeeKeeperMain.glade micon.png BeeKeeperAbout.glade)
 yes="j"
 
 echo "Installing Beekeeper..."

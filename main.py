@@ -7,7 +7,14 @@ import sys
 
 def show_about(*args):
 	about_builder=Gtk.Builder()
-	about_builder.add_from_file("./BeeKeeperAbout.glade")
+	try:
+		if( not sys.argv[1]=="--local"):
+			about_builder.add_from_file("/etc/BeeKeeper/BeeKeeperAbout.glade")
+		else:
+			about_builder.add_from_file(os.path.expanduser("~/.BeeKeeper/etc/BeeKeeperAbout.glade"))
+
+	except:
+		about_builder.add_from_file("/etc/BeeKeeper/BeeKeeperAbout.glade")
 	about=about_builder.get_object("aboutdialog1")
 	about.show_all()
 
@@ -17,11 +24,14 @@ if(not os.path.exists(os.getenv("HOME")+"/.BeeKeeper")):
 
 
 builder=Gtk.Builder()
-if( not sys.argv[1]=="--local"):
-	builder.add_from_file("/etc/BeeKeeper/BeeKeeperMain.glade")
-else:
-	builder.add_from_file(os.path.expanduser("~/.BeeKeeper/etc/BeeKeeperMain.glade"))
+try:
+	if( not sys.argv[1]=="--local"):
+		builder.add_from_file("/etc/BeeKeeper/BeeKeeperMain.glade")
+	else:
+		builder.add_from_file(os.path.expanduser("~/.BeeKeeper/etc/BeeKeeperMain.glade"))
 
+except:
+	builder.add_from_file("/etc/BeeKeeper/BeeKeeperMain.glade")
 w=builder.get_object("applicationwindow1")
 
 abm=builder.get_object("menu3")
