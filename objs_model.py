@@ -1,7 +1,7 @@
 import pickle
 from gi.repository import Gtk
 import datetime
-import os
+import os,shutil
 
 
 class Spendable(object):
@@ -93,7 +93,10 @@ class MainController(object):
 		self.stat_med_ent=None
 		self.stat_all_ent=None
 
+		# ON STD
 		self.savename=os.getenv("HOME")+"/.BeeKeeper/bees.pik"
+		# ON TEST
+		self.savename="bees.pik"
 
 	def build_t1_model(self):
 		for volk in self.volksverwaltung.voelker:
@@ -297,6 +300,18 @@ class MainController(object):
 			self.t3_model.append((med.name,med.preis_pro_menge,med.menge,med.datum.strftime("%d-%m-%y")))
 		return
 
+	def make_backup(self,*args):
+		builder=Gtk.Builder()
+		builder.add_from_file("BeeKeeperBackupDialog.glade")
+		dialog1=builder.get_object("dialog1")
+		but=builder.get_object("button1")
+		print(but)
+		chooser=builder.get_object("filechooserbutton1")
+		response=dialog1.run()
+		if(response==Gtk.ResponseType.OK):
+			fname=chooser.get_path()
+			shutil.copyfile(self.savename,fname)
+
 
 
 
@@ -331,6 +346,10 @@ class MainController(object):
 		self.add_button.connect("clicked",self.add_volk)
 		self.add_food_button.connect("clicked",self.add_food)
 		self.add_med_button.connect("clicked",self.add_med)
+
+		b.get_object("imagemenuitem4").connect("activate",self.make_backup)
+
+
 
 	def build_treeview1(self,treeview):
 		global t1_model
