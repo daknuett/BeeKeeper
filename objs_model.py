@@ -307,6 +307,14 @@ class MainController(object):
 			fname=chooser.get_filename()
 			shutil.copyfile(self.savename,fname)
 		chooser.destroy()
+	def import_from_file(self,*args):
+		chooser=Gtk.FileChooserDialog("Backupdatei zum Import wählen",self.window,Gtk.FileChooserAction.OPEN,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OPEN,Gtk.ResponseType.OK))
+		response=chooser.run()
+		if(response==Gtk.ResponseType.OK):
+			fname=chooser.get_filename()
+			shutil.copyfile(self.savename,self.savename+".bak")
+			shutil.copyfile(fname,self.savename)
+		chooser.destroy()
 
 
 
@@ -345,6 +353,7 @@ class MainController(object):
 		self.add_med_button.connect("clicked",self.add_med)
 
 		b.get_object("imagemenuitem4").connect("activate",self.make_backup)
+		b.get_object("imagemenuitem2").connect("activate",self.import_from_file)
 
 
 
