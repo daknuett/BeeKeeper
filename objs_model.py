@@ -37,6 +37,10 @@ class Futter(Spendable):
 		xml_str+="\t"*indent
 		xml_str+='</futter>\n'
 		return xml_str
+	def to_csv(self,separator=','):
+		csv_str=""
+		csv_str+="futter{0}{1}{0}{2}{0}{3}\n".format(separator,self.name,self.menge,self.preis_pro_menge)
+		return csv_str
 
 
 	
@@ -69,6 +73,10 @@ class Medikament(Spendable):
 		xml_str+="\t"*indent
 		xml_str+='</medikament>\n'
 		return xml_str
+	def to_csv(self,separator=','):
+		csv_str=""
+		csv_str+="medikament{0}{1}{0}{2}{0}{3}\n".format(separator,self.name,self.menge,self.preis_pro_menge)
+		return csv_str
 
 class Volk(object):
 	def __init__(self,name,ort,groesse):
@@ -102,6 +110,20 @@ class Volk(object):
 		xml_str+="\t"*indent
 		xml_str+="</volk>\n"
 		return xml_str
+	def to_csv(self,pathspec="./",separator=","):
+		"""unlike Futter.to_csv or Medikament.to_csv this will write everyting to a file"""
+		_name=pathspec+self.name.replace(" ","_")
+		foods=open(_name+"_futter.csv","w")
+		for futter in self.futterlist:
+			foods.write(futter.to_csv(separator))
+		foods.close()
+		meds=open(_name+"_med.csv","w")
+		for med in self.medikamentenlist:
+			meds.write(med.to_csv(separator))
+		meds.close()
+		Self=open(_name+".csv","w")
+		Self.write('volk{0}{1}{0}{2}{0}{3}\n'.format(separator,self.name,self.ort,self.groesse))
+		Self.close()
 
 	
 class Volksverwaltung(object):
@@ -123,6 +145,9 @@ class Volksverwaltung(object):
 		xml_str+="\t"*indent
 		xml_str+="</voelker>\n"
 		return xml_str
+	def to_csv(self,pathspec="./",separator=","):
+		for volk in self.voelker:
+			volk.to_csv(pathspec,separator)
 
 class MainController(object):
 	def __init__(self):
