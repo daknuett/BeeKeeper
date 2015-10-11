@@ -20,6 +20,25 @@ class Futter(Spendable):
 		return self.menge*self.preis_pro_menge + obj
 	def __radd__(self,obj):
 		return self.menge*self.preis_pro_menge + obj
+
+	def to_xml(self,indent=0):
+		"""
+			convert the object to a xml representation
+			"""
+		xml_str=""
+		xml_str+="\t"*indent
+		xml_str+='<futter name="{0}">\n'.format(self.name)
+		xml_str+="\t"*(indent+1)
+		xml_str+='<property name="{0}">{1}</property>\n'.format("menge",self.menge)
+		xml_str+="\t"*(indent+1)
+		xml_str+='<property name="{0}">{1}</property>\n'.format("preis_pro_menge",self.preis_pro_menge)
+		xml_str+="\t"*(indent+1)
+		xml_str+='<property name="{0}">{1}</property>\n'.format("datum",self.datum)
+		xml_str+="\t"*indent
+		xml_str+='</futter>\n'
+		return xml_str
+
+
 	
 class Medikament(Spendable):
 	def __init__(self,name,menge,preis_pro_menge,datum):
@@ -34,6 +53,22 @@ class Medikament(Spendable):
 		return self.menge*self.preis_pro_menge + obj
 	def __radd__(self,obj):
 		return self.menge*self.preis_pro_menge + obj
+	def to_xml(self,indent=0):
+		"""
+			convert the object to a xml representation
+			"""
+		xml_str=""
+		xml_str+="\t"*indent
+		xml_str+='<medikament name="{0}">\n'.format(self.name)
+		xml_str+="\t"*(indent+1)
+		xml_str+='<property name="{0}">{1}</property>\n'.format("menge",self.menge)
+		xml_str+="\t"*(indent+1)
+		xml_str+='<property name="{0}">{1}</property>\n'.format("preis_pro_menge",self.preis_pro_menge)
+		xml_str+="\t"*(indent+1)
+		xml_str+='<property name="{0}">{1}</property>\n'.format("datum",self.datum)
+		xml_str+="\t"*indent
+		xml_str+='</medikament>\n'
+		return xml_str
 
 class Volk(object):
 	def __init__(self,name,ort,groesse):
@@ -52,6 +87,22 @@ class Volk(object):
 		for futter in self.futterlist:
 			if(futter.datum==datetime.datetime.strptime(date,"%d-%m-%y").date()):
 				futter.menge=size
+	def to_xml(self,indent=0):
+		xml_str=""
+		xml_str+="\t"*indent
+		xml_str+='<volk name="{0}">\n'.format(self.name)
+		xml_str+="\t"*(indent+1)
+		xml_str+='<property name="{0}">{1}</property>\n'.format("ort",self.ort)
+		xml_str+="\t"*(indent+1)
+		xml_str+='<property name="{0}">{1}</property>\n'.format("groesse",self.groesse)
+		for futter in self.futterlist:
+			xml_str+=futter.to_xml(indent+1)
+		for med in self.medikamentenlist:
+			xml_str+=med.to_xml(indent+1)
+		xml_str+="\t"*indent
+		xml_str+="</volk>\n"
+		return xml_str
+
 	
 class Volksverwaltung(object):
 	def __init__(self,voelker=None):
@@ -63,6 +114,16 @@ class Volksverwaltung(object):
 		self.voelker.append(volk)
 	def del_volk(self,pos):
 		del(self.voelker[pos])
+	def to_xml(self,indent=0):
+		xml_str=""
+		xml_str+="\t"*indent
+		xml_str+="<voelker>\n"
+		for volk in self.voelker:
+			xml_str+=volk.to_xml(indent+1)
+		xml_str+="\t"*indent
+		xml_str+="</voelker>\n"
+		return xml_str
+
 class MainController(object):
 	def __init__(self):
 		self.t1_model=None

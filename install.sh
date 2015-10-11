@@ -166,7 +166,7 @@ fi
 
 
 echo "done."
-printf "BeeKeeper ready ror usage.\nThank you\n"
+printf "BeeKeeper ready for usage.\nThank you\n"
 
 printf "Thanks to Katherina Knuettel for the Icon.\n This program is FREE Software. See the GNU AGPL v3 for more information.\nCopyright (C) 2015 Daniel Knuettel\nhttps://www.gnu.org/licenses/agpl-3.0.html\n"
 
