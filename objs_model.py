@@ -96,7 +96,7 @@ class MainController(object):
 		# ON STD
 		self.savename=os.getenv("HOME")+"/.BeeKeeper/bees.pik"
 		# ON TEST
-		self.savename="bees.pik"
+#		self.savename="bees.pik"
 
 	def build_t1_model(self):
 		for volk in self.volksverwaltung.voelker:

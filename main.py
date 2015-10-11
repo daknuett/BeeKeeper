@@ -18,7 +18,7 @@ def show_about(*args):
 	about=about_builder.get_object("aboutdialog1")
 	about.show_all()
 
-test=True
+test=False
 
 if(not os.path.exists(os.getenv("HOME")+"/.BeeKeeper")):
 	print("~/.BeeKeeper does not exist, generating it")
