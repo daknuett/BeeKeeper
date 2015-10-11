@@ -301,21 +301,18 @@ class MainController(object):
 		return
 
 	def make_backup(self,*args):
-		builder=Gtk.Builder()
-		builder.add_from_file("BeeKeeperBackupDialog.glade")
-		dialog1=builder.get_object("dialog1")
-		but=builder.get_object("button1")
-		print(but)
-		chooser=builder.get_object("filechooserbutton1")
-		response=dialog1.run()
+		chooser=Gtk.FileChooserDialog("Backupdatei wählen",self.window,Gtk.FileChooserAction.OPEN,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OPEN,Gtk.ResponseType.OK))
+		response=chooser.run()
 		if(response==Gtk.ResponseType.OK):
-			fname=chooser.get_path()
+			fname=chooser.get_filename()
 			shutil.copyfile(self.savename,fname)
+		chooser.destroy()
 
 
 
 
 	def build_from_builder(self,b):
+		self.window=b.get_object("window1")
 		self.add_food_button=b.get_object("button1")
 		self.add_med_button=b.get_object("button2")
 		self.del_button=b.get_object("button3")

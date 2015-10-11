@@ -54,7 +54,7 @@
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem4">
-                        <property name="label">gtk-save-as</property>
+                        <property name="label">gtk-harddisk</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="use_underline">True</property>
@@ -155,6 +155,7 @@
                         <property name="label">gtk-info</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="show_about" swapped="no"/>
                         <signal name="select" handler="show_about" swapped="no"/>
