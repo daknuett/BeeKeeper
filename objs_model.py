@@ -1,7 +1,8 @@
-import pickle
+import pickle,time
 from gi.repository import Gtk
 import datetime
 import os,shutil
+from objs_graphics import *
 
 
 class Spendable(object):
@@ -401,6 +402,22 @@ class MainController(object):
 			shutil.copyfile(self.savename,self.savename+".bak")
 			shutil.copyfile(fname,self.savename)
 		chooser.destroy()
+	def export_data(self,*args):
+		dialog=ExportDialog(self.window)
+		response=dialog.run()
+		if(response!=Gtk.ResponseType.OK):
+			dialog.destroy()
+			return
+		todo_export=dialog.selection_type
+		if(todo_export=="CSV"):
+			self.volksverwaltung.to_csv(pathspec=dialog.selection_folder+"/")
+		else:
+			txt=self.volksverwaltung.to_xml()
+			f=open(dialog.selection_folder+"/export-"+str(int(time.time()))+".xml","w")
+			f.write(txt)
+			f.close()
+		dialog.destroy()
+
 
 
 
@@ -440,6 +457,8 @@ class MainController(object):
 
 		b.get_object("imagemenuitem4").connect("activate",self.make_backup)
 		b.get_object("imagemenuitem2").connect("activate",self.import_from_file)
+		b.get_object("imagemenuitem11").connect("activate",self.export_data)
+
 
 
 

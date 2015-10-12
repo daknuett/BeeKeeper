@@ -1,0 +1,2 @@
+Bug: I use Gtk.FileChooserButton with Gtk.FileChooserAction.SELECT_FOLDER , 
+	but it does not allow me to select folders. 

@@ -51,6 +51,7 @@ maincontroller=MainController()
 maincontroller.load_volksverwaltung()
 maincontroller.build_from_builder(builder)
 
+
 w.show_all()
 w.connect("delete-event", maincontroller.save_and_exit)
 Gtk.main()
