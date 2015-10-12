@@ -31,6 +31,9 @@ then
 	python3 -c"import time;time.sleep(1)" || { echo "requirement python3 not satisfied";exit 1; }
 
 	python3 -c"import gi.repository" || { echo "requirement gi.repository not satisfied"; exit 1; }
+	python3 -c"import shutils" || { echo "requirement shutils not satisfied"; exit 1; }
+	python3 -c"import datetime" || { echo "requirement datetime not satisfied"; exit 1; }
+	python3 -c"import pickle" || { echo "requirement pickle not satisfied"; exit 1; }
 
 	echo "done."
 
@@ -168,6 +171,12 @@ fi
 echo "done."
 printf "BeeKeeper ready for usage.\nThank you\n"
 
+printf "\n\n\n\n\n"
+
 printf "Thanks to Katherina Knuettel for the Icon.\n This program is FREE Software. See the GNU AGPL v3 for more information.\nCopyright (C) 2015 Daniel Knuettel\nhttps://www.gnu.org/licenses/agpl-3.0.html\n"
 
+
+printf "\n\n\n\n\n"
+
+printf "BeeKeeper does support exporting to CSV and to XML in version 0.3!\n"
 exit 0
