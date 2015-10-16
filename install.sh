@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pyfiles=(main.py objs_model.py objs_main.py )
+pyfiles=(main.py objs_model.py objs_main.py objs_graphics.py )
 etcfiles=(BeeKeeperMain.glade micon.png BeeKeeperAbout.glade)
 yes="j"
 

@@ -402,6 +402,7 @@ class MainController(object):
 			shutil.copyfile(self.savename,self.savename+".bak")
 			shutil.copyfile(fname,self.savename)
 		chooser.destroy()
+		self.load_volksverwaltung()
 	def export_data(self,*args):
 		dialog=ExportDialog(self.window)
 		response=dialog.run()
