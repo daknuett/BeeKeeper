@@ -311,7 +311,11 @@ class MainController(object):
 		sel=self.t1.get_selection()
 		model,row=sel.get_selected()
 		place=0
-		vname=self.t1_model[row][0]
+		vname=None
+		try:
+			vname=self.t1_model[row][0]
+		except:
+			return
 		for volk in self.volksverwaltung.voelker:
 			if(volk.name==vname):
 				break
@@ -345,7 +349,11 @@ class MainController(object):
 		sel=self.t1.get_selection()
 		model,row=sel.get_selected()
 		place=0
-		vname=self.t1_model[row][0]
+		vname=None
+		try:
+			vname=self.t1_model[row][0]
+		except:
+			return
 		for volk in self.volksverwaltung.voelker:
 			if(volk.name==vname):
 				break
@@ -373,7 +381,11 @@ class MainController(object):
 		sel=self.t1.get_selection()
 		model,row=sel.get_selected()
 		place=0
-		vname=self.t1_model[row][0]
+		vname=None
+		try:
+			vname=self.t1_model[row][0]
+		except:
+			return
 		for volk in self.volksverwaltung.voelker:
 			if(volk.name==vname):
 				break
