@@ -19,8 +19,11 @@ class ExportDialog(Gtk.Dialog):
 		self.combo.set_entry_text_column(0)
 		self.contentarea.add(self.combo)
 
-		self.filechooser=Gtk.FileChooserButton(Gtk.FileChooserAction.SELECT_FOLDER)
+		self.filechooser = Gtk.FileChooserButton(Gtk.FileChooserAction.CREATE_FOLDER)
+		self.filechooser.set_create_folders(True)
+		self.filechooser.set_action(Gtk.FileChooserAction.SELECT_FOLDER)
 		self.filechooser.connect("file-set",self.update_select_folder)
+
 		self.contentarea.add(self.filechooser)
 		self.show_all()
 
@@ -32,4 +35,3 @@ class ExportDialog(Gtk.Dialog):
 		return
 	def update_select_folder(self,chooser,*args):
 		self.selection_folder=chooser.get_filename()
-		os.mkdir(self.selection_folder)
