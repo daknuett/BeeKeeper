@@ -1,7 +1,7 @@
 import time
 from gi.repository import Gtk
 import datetime
-import os,shutil
+import os,shutil,pickle
 from objs_graphics import *
 
 
@@ -118,7 +118,7 @@ class Volk(object):
 		if(not hasattr(self,"death_date")):
 			print("WARNING: adding attr <death_date>")
 			self.death_date = None
-		if(not hasattr(self,"xml_values2")):
+		if(not hasattr(self,"xml_values")):
 			print("WARNING: adding attr <xml_values>")
 		self.xml_values = {"ort":"ort",
 			"groesse":"groesse",
@@ -154,15 +154,15 @@ class Volk(object):
 		for med in self.medikamentenlist:
 			meds.write(med.to_csv(separator))
 		meds.close()
-		Self=open(_name+".csv","w")
-		Self.write('volk{0}{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}\n'.format(separator,
-					self.name,
-					self.ort,
-					self.groesse,
-					self.dead,
-					self.death_reason,
-					self.death_date))
-		Self.close()
+		csv_str = "volk"
+		for name,entity in self.xml_values.items():
+			csv_str += '{0}{1}'.format(separator,getattr(self,entity))
+		return csv_str + "\n"
+	def get_header(self,separator = ","):
+		csv_str = "volk"
+		for name,entity in self.xml_values.items():
+			csv_str += '{0}{1}'.format(separator,name)
+		return csv_str + "\n"
 
 	
 class Volksverwaltung(object):
@@ -192,8 +192,11 @@ class Volksverwaltung(object):
 		xml_str+="</voelker>\n"
 		return xml_str
 	def to_csv(self,pathspec="./",separator=","):
+		voelker = open(pathspec + "voelker.csv","w")	
+		voelker.write(self.voelker[0].get_header(separator))
 		for volk in self.voelker:
-			volk.to_csv(pathspec,separator)
+			voelker.write(volk.to_csv(pathspec,separator))
+		voelker.close()
 
 class MainController(object):
 	def __init__(self):
@@ -479,11 +482,18 @@ class MainController(object):
 		chooser.destroy()
 	def import_from_file(self,*args):
 		chooser=Gtk.FileChooserDialog("Backupdatei zum Import wählen",self.window,Gtk.FileChooserAction.OPEN,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OPEN,Gtk.ResponseType.OK))
-		response=chooser.run()
-		if(response==Gtk.ResponseType.OK):
-			fname=chooser.get_filename()
-			shutil.copyfile(self.savename,self.savename+".bak")
-			shutil.copyfile(fname,self.savename)
+		response = chooser.run()
+		if(response == Gtk.ResponseType.OK):
+			fname = chooser.get_filename()
+			try:
+				volksverwaltung = pickle.load(open(fname,"rb"))
+				self.volksverwaltung = volksverwaltung
+			except Exception as e:
+				print(e)
+			self.t1_model = Gtk.ListStore(str,str,int)
+			t1.set_model(self.t1_model)
+			self.build_t1_model()
+
 		chooser.destroy()
 		self.load_volksverwaltung()
 	def export_data(self,*args):
