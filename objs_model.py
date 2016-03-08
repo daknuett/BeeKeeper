@@ -420,25 +420,26 @@ class MainController(object):
 			print(e)
 			return
 
-		sel=self.t1.get_selection()
-		model,row=sel.get_selected()
-		place=0
-		vname=None
+		sel = self.t1.get_selection()
+		model,row = sel.get_selected()
+		place = 0
+		vname = None
 		try:
 			vname=self.t1_model[row][0]
-		except:
+		except Exception as e:
+			print(e)
 			return
 		for volk in self.volksverwaltung.voelker:
 			if(volk.name==vname):
 				break
 			place+=1
 		self.food_stats_volk_index=place
-		foods=self.volksverwaltung.voelker[place].futterlist
-		stat_foods=[]
+		foods = self.volksverwaltung.voelker[place].futterlist
+		stat_foods = []
 		for futter in foods:
 			if(futter.datum>=da):
 				stat_foods.append(futter)
-		self.stat_foods=stat_foods
+		self.stat_foods = stat_foods
 		for food in stat_foods:
 			self.t2_model.append((food.name,food.preis_pro_menge,food.menge,food.datum.strftime("%d-%m-%y")))
 	def show_med_stats(self,dfrom):
