@@ -89,11 +89,11 @@ class Volk(object):
 		self.dead = False
 		self.death_reason = ""
 		self.death_date = None
-		self.xml_values = {"ort":self.ort,
-			"groesse":self.groesse,
-			"tot":self.dead,
-			"todesursache":self.death_reason,
-			"sterbedatum":self.death_date}
+		self.xml_values = {"ort":"ort",
+			"groesse":"groesse",
+			"tot":"dead",
+			"todesursache":"death_reason",
+			"sterbedatum":"death_date"}
 	def __str__(self):
 		return self.name+": steht in "+self.ort+" ist "+str(self.groesse)+" Rähmchen groß"
 	def fuettern(self,futter):
@@ -110,17 +110,21 @@ class Volk(object):
 	def update_current_version(self):
 		""" add missing attributes of older versions """
 		if(not hasattr(self,"dead")):
+			print("WARNING: adding attr <dead>")
 			self.dead = False
 		if(not hasattr(self,"death_reason")):
+			print("WARNING: adding attr <death_reason>")
 			self.death_reason = ""
 		if(not hasattr(self,"death_date")):
+			print("WARNING: adding attr <death_date>")
 			self.death_date = None
-		if(not hasattr(self,"xml_values")):
-			self.xml_values = {"ort":self.ort,
-				"groesse":self.groesse,
-				"tot":self.dead,
-				"todesursache":self.death_reason,
-				"sterbedatum":self.death_date}
+		if(not hasattr(self,"xml_values2")):
+			print("WARNING: adding attr <xml_values>")
+		self.xml_values = {"ort":"ort",
+			"groesse":"groesse",
+			"tot":"dead",
+			"todesursache":"death_reason",
+			"sterbedatum":"death_date"}
 
 	def to_xml(self,indent = 0):
 		self.update_current_version()
@@ -130,7 +134,7 @@ class Volk(object):
 		xml_str+='<volk name="{0}">\n'.format(self.name)
 		for name,entity in self.xml_values.items():
 			xml_str+="\t"*(indent+1)
-			xml_str+='<property name="{0}">{1}</property>\n'.format(name,entity)
+			xml_str+='<property name="{0}">{1}</property>\n'.format(name,getattr(self,entity))
 		for futter in self.futterlist:
 			xml_str+=futter.to_xml(indent+1)
 		for med in self.medikamentenlist:
@@ -172,9 +176,11 @@ class Volksverwaltung(object):
 	def del_volk(self,pos):
 		del(self.voelker[pos])
 	def kill_volk(self,pos,reason):
-		self.voelker[pos].dead = True
-		self.voelker[pos].death_reason = reason
-		self.voelker[pos].death_date = datetime.datetime.today()
+		volk = self.voelker[pos]
+		volk.dead = True
+		volk.death_reason = reason
+		volk.death_date = datetime.datetime.today()
+		self.voelker[pos] = volk
 
 	def to_xml(self,indent=0):
 		xml_str=""
