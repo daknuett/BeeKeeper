@@ -31,7 +31,6 @@ then
 	python3 -c"import time;time.sleep(1)" || { echo "requirement python3 not satisfied";exit 1; }
 
 	python3 -c"import gi.repository" || { echo "requirement gi.repository not satisfied"; exit 1; }
-	python3 -c"import shutils" || { echo "requirement shutils not satisfied"; exit 1; }
 	python3 -c"import datetime" || { echo "requirement datetime not satisfied"; exit 1; }
 	python3 -c"import pickle" || { echo "requirement pickle not satisfied"; exit 1; }
 

@@ -1,4 +1,4 @@
-import pickle,time
+import time
 from gi.repository import Gtk
 import datetime
 import os,shutil
@@ -475,7 +475,7 @@ class MainController(object):
 		response=chooser.run()
 		if(response==Gtk.ResponseType.OK):
 			fname=chooser.get_filename()
-			shutil.copyfile(self.savename,fname)
+			pickle.dump(self.volksverwaltung,open(fname,"wb"))
 		chooser.destroy()
 	def import_from_file(self,*args):
 		chooser=Gtk.FileChooserDialog("Backupdatei zum Import wählen",self.window,Gtk.FileChooserAction.OPEN,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OPEN,Gtk.ResponseType.OK))
