@@ -98,7 +98,7 @@ class Volk(object):
 			"tot":"dead",
 			"todesursache":"death_reason",
 			"sterbedatum":"death_date"}
-		self.notices = []
+		self.notes = []
 		self.dates = []
 	def __str__(self):
 		return self.name+": steht in "+self.ort+" ist "+str(self.groesse)+" Rähmchen groß"
@@ -176,11 +176,18 @@ class Volk(object):
 		self.sizes.append((datetime.datetime.today(),stock))
 
 class Stock(object):
-	def __init__(self,bees,food,brood,drone_brood):
+	def __init__(self,bees, food, brood, queen_bee, drone_brood, date, note = ""):
 		self.bees = bees
 		self.food = food
 		self.brood = brood
-		self.drone_brood = brood
+		self.drone_brood = drone_brood
+		self.queen_bee = queen_bee
+		self.note = note
+		self.date = date
+	def __str__(self):
+		return "Stock({},{},{},{},{},{},{})".format(self.bees, self.food, self.brood, self.queen_bee, self.drone_brood, self.date, self.note)
+	def __repr__(self):
+		return str(self)
 
 	
 class Volksverwaltung(object):
@@ -589,6 +596,25 @@ class MainController(object):
 				queen_bee_color_select,
 				queen_bee_last_year)
 		self.information_controller.__start__()
+		stock_bee_entry = b.get_object("stock_bee_entry")
+		stock_food_entry = b.get_object("stock_food_entry")
+		stock_brood_entry = b.get_object("stock_brood_entry")
+		stock_has_queen = b.get_object("stock_has_queen")
+		stock_drone_brood = b.get_object("stock_drone_brood")
+		stock_note_enable = b.get_object("stock_note_enable")
+		stock_note_entry = b.get_object("stock_note_entry")
+		stock_add = b.get_object("stock_add")
+		self.stock_controller = StockInformationController(
+			stock_bee_entry,
+			stock_food_entry,
+			stock_brood_entry,
+			stock_has_queen,
+			stock_drone_brood,
+			stock_note_enable,
+			stock_note_entry,
+			stock_add,
+			self)
+		self.stock_controller.__start__()
 
 
 
@@ -733,3 +759,69 @@ class InformationController(object):
 class ExtraDataController(object):
 	def __init__(self):
 		pass
+class StockInformationController(object):
+	def __init__(self,
+			stock_bee_entry,
+			stock_food_entry,
+			stock_brood_entry,
+			stock_has_queen,
+			stock_drone_brood,
+			stock_note_enable,
+			stock_note_entry,
+			stock_add,
+			main_controller
+		    ):
+		self.stock_bee_entry = stock_bee_entry  
+		self.stock_food_entry = stock_food_entry  
+		self.stock_brood_entry = stock_brood_entry  
+		self.stock_has_queen = stock_has_queen  
+		self.stock_drone_brood = stock_drone_brood  
+		self.stock_note_enable = stock_note_enable    
+		self.stock_note_entry = stock_note_entry 
+		self.stock_add = stock_add
+		self.main_controller = main_controller
+	def __start__(self):
+		self.stock_add.connect("clicked",self.add_stock)
+	def float_from_entry(self,entry):
+		text = entry.get_text()
+		_float = 0
+		if ("," in text):
+			text = text.replace(",",".")
+		try:
+			_float = float(text)
+		except:
+			entry.set_text("Zahl benoetigt")
+			return
+		return _float
+	def add_stock(self,button):
+		bees = self.float_from_entry(self.stock_bee_entry)
+		food = self.float_from_entry(self.stock_food_entry)
+		brood = self.float_from_entry(self.stock_brood_entry)
+		if(None in (bees,food,brood)):
+			return
+		today = datetime.datetime.today()
+		drone_brood = self.stock_drone_brood.get_active()
+		has_queen = self.stock_has_queen.get_active()
+
+		add_note =  self.stock_note_enable.get_active()
+		note = ""
+		if(add_note):
+			note = self.stock_note_entry.get_text()
+
+		# now get the active iter
+		sel=self.main_controller.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.main_controller.t1_model[row][0]
+		for volk in self.main_controller.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		if(not add_note):
+			self.main_controller.volksverwaltung.voelker[place].add_stock(
+					Stock(bees,food,brood,has_queen,drone_brood,today))
+		else:
+			self.main_controller.volksverwaltung.voelker[place].add_stock(
+					Stock(bees,food,brood,has_queen,drone_brood,today,note))
+		print(self.main_controller.volksverwaltung.voelker[place].sizes)
+
