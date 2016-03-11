@@ -8,11 +8,11 @@ yes="j"
 
 echo "Installing Beekeeper..."
 
-echo "Do you want to install BeeKeeper local(l) or global(g) [G/l]?"
+echo "Do you want to install BeeKeeper locally(l) or globally(g) [G/l]?"
 read input
 if [[ "$input" == "l" ]]
 then 
-	echo "installing local..."
+	echo "installing locally..."
 	if [ -e ~/.BeeKeeper/ ]
 	then 
 		echo "Path  ~/.BeeKeeper/  exists already is BeeKeeper installed?"
@@ -38,17 +38,17 @@ then
 
 	echo "done."
 
-	echo "making DIR ~/.BeeKeeper ..."
+	echo "touching DIR ~/.BeeKeeper ..."
 	mkdir ~/.BeeKeeper
 	echo "done."
 
-	echo "making DIR ~/.BeeKeeper/usr"
+	echo "touching DIR ~/.BeeKeeper/usr"
 	mkdir ~/.BeeKeeper/usr
 	echo "done."
-	echo "making DIR ~/.BeeKeeper/pys"
+	echo "touching DIR ~/.BeeKeeper/pys"
 	mkdir ~/.BeeKeeper/pys
 	echo "done."
-	echo "making DIR ~/.BeeKeeper/etc"
+	echo "touching DIR ~/.BeeKeeper/etc"
 	mkdir ~/.BeeKeeper/etc
 	echo "done."
 
@@ -102,7 +102,7 @@ then
 
 
 else
-	echo "installing global..."
+	echo "installing globally..."
 
 	if [ -e ~/.BeeKeeper/ ]
 	then 
@@ -127,7 +127,7 @@ else
 	echo "done."
 		
 
-	echo "making DIR ~/.BeeKeeper ..."
+	echo "touching DIR ~/.BeeKeeper ..."
 	mkdir ~/.BeeKeeper
 	echo "done."
 
@@ -145,7 +145,7 @@ else
 		fi
 	fi
 
-	echo "making DIR /etc/BeeKeeper"
+	echo "touching DIR /etc/BeeKeeper"
 	sudo mkdir /etc/BeeKeeper
 	echo "done."
 
