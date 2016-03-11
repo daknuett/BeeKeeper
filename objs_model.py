@@ -3,6 +3,8 @@ from gi.repository import Gtk
 import datetime
 import os,shutil,pickle
 from objs_graphics import *
+from bee_util.queen_bee import calculations as qb_calc
+from bee_util.queen_bee import data as qb_data
 
 
 class Spendable(object):
@@ -86,6 +88,8 @@ class Volk(object):
 		self.groesse = groesse
 		self.futterlist = []
 		self.medikamentenlist = []
+		self.old_groesse = []
+		self.sizes = []
 		self.dead = False
 		self.death_reason = ""
 		self.death_date = None
@@ -94,6 +98,8 @@ class Volk(object):
 			"tot":"dead",
 			"todesursache":"death_reason",
 			"sterbedatum":"death_date"}
+		self.notices = []
+		self.dates = []
 	def __str__(self):
 		return self.name+": steht in "+self.ort+" ist "+str(self.groesse)+" Rähmchen groß"
 	def fuettern(self,futter):
@@ -120,11 +126,14 @@ class Volk(object):
 			self.death_date = None
 		if(not hasattr(self,"xml_values")):
 			print("WARNING: adding attr <xml_values>")
-		self.xml_values = {"ort":"ort",
-			"groesse":"groesse",
-			"tot":"dead",
-			"todesursache":"death_reason",
-			"sterbedatum":"death_date"}
+			self.xml_values = {"ort":"ort",
+				"groesse":"groesse",
+				"tot":"dead",
+				"todesursache":"death_reason",
+				"sterbedatum":"death_date"}
+		if(not hasattr(self,"sizes")):
+			self.old_groesse = [(datetime.datetime.today(),self.groesse)]
+			self.sizes = []
 
 	def to_xml(self,indent = 0):
 		self.update_current_version()
@@ -163,6 +172,15 @@ class Volk(object):
 		for name,entity in self.xml_values.items():
 			csv_str += '{0}{1}'.format(separator,name)
 		return csv_str + "\n"
+	def add_stock(self,stock):
+		self.sizes.append((datetime.datetime.today(),stock))
+
+class Stock(object):
+	def __init__(self,bees,food,brood,drone_brood):
+		self.bees = bees
+		self.food = food
+		self.brood = brood
+		self.drone_brood = brood
 
 	
 class Volksverwaltung(object):
@@ -261,6 +279,7 @@ class MainController(object):
 		self.volksverwaltung.voelker[int(path)].ort = text
 	def groesse_changed(self,widget,path,text):
 		self.t1_model[path][2] = int(text)
+		self.volksverwaltung.voelker[int(path)].old_groesse.append((datetime.datetime.today(),self.volksverwaltung.voelker[int(path)].groesse))
 		self.volksverwaltung.voelker[int(path)].groesse = int(text)
 	def save_and_exit(self,*args):
 		pickle.dump(self.volksverwaltung,open(self.savename,"wb"))
@@ -559,6 +578,18 @@ class MainController(object):
 
 		self.kill_volk_button.connect("clicked",self.kill_volk)
 
+		queen_bee_color_this_year = b.get_object("queen_bee_color_this_year")
+		queen_bee_year_select = b.get_object("queen_bee_year_select")
+		queen_bee_color_of_year = b.get_object("queen_bee_color_of_year")
+		queen_bee_color_select = b.get_object("queen_bee_color_select")
+		queen_bee_last_year = b.get_object("queen_bee_last_year")
+		self.information_controller = InformationController(queen_bee_color_this_year,
+				queen_bee_year_select,
+				queen_bee_color_of_year,
+				queen_bee_color_select,
+				queen_bee_last_year)
+		self.information_controller.__start__()
+
 
 
 
@@ -655,3 +686,50 @@ class MainController(object):
 			volksverwaltung.add_volk(Volk("TestVolk","Haus",10))
 		self.volksverwaltung= volksverwaltung
 		
+
+class InformationController(object):
+	def __init__(self,queen_bee_color_this_year_label,
+			queen_bee_year_select_spin_button,
+			queen_bee_color_of_year_label,
+			queen_bee_color_select_combo,
+			queen_bee_last_year_label):
+		self.queen_bee_color_this_year_label = queen_bee_color_this_year_label
+		self.queen_bee_year_select_spin_button = queen_bee_year_select_spin_button
+		self.queen_bee_color_of_year_label = queen_bee_color_of_year_label
+		self.queen_bee_color_select_combo = queen_bee_color_select_combo
+		self.queen_bee_last_year_label = queen_bee_last_year_label
+
+	def __start__(self):
+		self.queen_bee_color_this_year_label.set_text(qb_calc.get_current_color())
+		
+		
+		self.color_select_model = Gtk.ListStore(str)
+		renderer_text = Gtk.CellRendererText()
+		self.queen_bee_color_select_combo.set_model(self.color_select_model)
+		self.queen_bee_color_select_combo.set_entry_text_column(0)
+		self.queen_bee_color_select_combo.connect("changed",self.set_new_year_by_color)
+		for k,v in qb_data.color_de.items():
+			self.color_select_model.append([v])
+
+		self.queen_bee_color_select_combo.pack_start(renderer_text,True)
+		self.queen_bee_color_select_combo.add_attribute(renderer_text, "text", 0)
+
+
+		self.queen_bee_year_select_spin_button.set_numeric(True)
+		self.queen_bee_year_select_spin_button.set_range(1990,3000)
+		self.queen_bee_year_select_spin_button.set_value(datetime.datetime.today().year)
+		self.queen_bee_year_select_spin_button.connect("value-changed",self.set_new_color_by_year)
+
+	def set_new_year_by_color(self,combo):
+		tree_iter = combo.get_active_iter()
+		if(tree_iter == None):
+			return
+		color = self.color_select_model[tree_iter][0]
+		self.queen_bee_last_year_label.set_text(str(qb_calc.last_year_from_color(color)))
+	def set_new_color_by_year(self,button):
+		year = int(button.get_value())
+		self.queen_bee_color_of_year_label.set_text(qb_calc.color_from_year(year))
+
+class ExtraDataController(object):
+	def __init__(self):
+		pass
