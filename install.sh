@@ -1,7 +1,9 @@
 #!/bin/bash
 
-pyfiles=(main.py objs_model.py objs_main.py objs_graphics.py )
+pyfiles=(main.py objs_model.py objs_main.py objs_graphics.py bee_util/__init__.py bee_util/queen_bee/__init__.py bee_util/queen_bee/data.py bee_util/queen_bee/calculations.py )
 etcfiles=(BeeKeeperMain.glade micon.png BeeKeeperAbout.glade)
+
+dirs=( bee_util/ bee_util/queen_bee/)
 yes="j"
 
 echo "Installing Beekeeper..."
@@ -49,6 +51,15 @@ then
 	echo "making DIR ~/.BeeKeeper/etc"
 	mkdir ~/.BeeKeeper/etc
 	echo "done."
+
+	echo "creating dirs..."
+	for dir in ${dirs[*]}
+	do
+		echo $dir
+		mkdir ~/.BeeKeeper/pys/$dir
+	done
+	echo "done."
+
 
 	echo "copying over py files ..."
 	for file in ${pyfiles[*]}
@@ -136,6 +147,14 @@ else
 
 	echo "making DIR /etc/BeeKeeper"
 	sudo mkdir /etc/BeeKeeper
+	echo "done."
+
+	echo "creating dirs..."
+	for dir in ${dirs[*]}
+	do
+		echo $dir
+		sudo mkdir /etc/BeeKeeper/$dir
+	done
 	echo "done."
 
 
