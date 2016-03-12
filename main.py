@@ -1,9 +1,11 @@
 from gi.repository import Gtk
+import sys
+# python files have been moved
+sys.path.append("pythons/")
 from objs_main import *
 from objs_model import *
 import pickle
 import os
-import sys
 
 def show_about(*args):
 	about_builder=Gtk.Builder()

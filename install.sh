@@ -1,9 +1,9 @@
 #!/bin/bash
 
-pyfiles=(main.py objs_model.py objs_main.py objs_graphics.py bee_util/__init__.py bee_util/queen_bee/__init__.py bee_util/queen_bee/data.py bee_util/queen_bee/calculations.py )
+pyfiles=(main.py pythons/objs_model.py pythons/objs_main.py pythons/objs_graphics.py bee_util/__init__.py bee_util/queen_bee/__init__.py bee_util/queen_bee/data.py bee_util/queen_bee/calculations.py )
 etcfiles=(BeeKeeperMain.glade micon.png BeeKeeperAbout.glade)
 
-dirs=( bee_util/ bee_util/queen_bee/)
+dirs=(pythons/ bee_util/ bee_util/queen_bee/)
 yes="j"
 
 echo "Installing Beekeeper..."
@@ -72,17 +72,17 @@ then
 	for file in ${etcfiles[*]}
 	do
 		echo $file
-		cp $file ~/.BeeKeeper/etc/$file
+		cp etc/$file ~/.BeeKeeper/etc/$file
 	done
 	echo "done."
 
 	echo "copying Executable ... "
-	cp BeeKeeper.local ~/.BeeKeeper/usr/BeeKeeper
+	cp etc/BeeKeeper.local ~/.BeeKeeper/usr/BeeKeeper
 	chmod +x ~/.BeeKeeper/usr/BeeKeeper
 	echo "done."
 
 	echo "extending .desktop file ..."
-	cp BeeKeeper.desktop.local BeeKeeper.desktop
+	cp etc/BeeKeeper.desktop.local BeeKeeper.desktop
 	echo "Icon=$HOME/.BeeKeeper/etc/micon.png">>BeeKeeper.desktop
 	echo "Exec=$HOME/.BeeKeeper/usr/BeeKeeper">>BeeKeeper.desktop
 	echo "done."
@@ -93,9 +93,9 @@ then
 		echo "~/.local/share/applications does not exist. cannot install."
 		exit 1
 	fi
-	cp BeeKeeper.desktop ~/.local/share/applications/BeeKeeper.desktop
+	cp etc/BeeKeeper.desktop ~/.local/share/applications/BeeKeeper.desktop
 	chmod +x ~/.local/share/applications/BeeKeeper.desktop
-	rm BeeKeeper.desktop
+	rm etc/BeeKeeper.desktop
 	echo "done."
 
 	
@@ -168,12 +168,12 @@ else
 	for file in ${etcfiles[*]}
 	do
 		echo $file
-		sudo cp $file /etc/BeeKeeper/$file
+		sudo cp etc/$file /etc/BeeKeeper/$file
 	done
 	echo "done."
 
 	echo "copying file to /usr/bin"
-	sudo cp BeeKeeper.nonlocal /usr/bin/BeeKeeper
+	sudo cp etc/BeeKeeper.nonlocal /usr/bin/BeeKeeper
 	echo "done."
 
 	echo "generating executable ..."
@@ -181,7 +181,7 @@ else
 	echo "done."
 
 	echo "copiyng over desktop file ..."
-	sudo cp BeeKeeper.desktop.nonlocal /usr/share/applications
+	sudo cp etc/BeeKeeper.desktop.nonlocal /usr/share/applications
 	echo "done"
 fi
 
