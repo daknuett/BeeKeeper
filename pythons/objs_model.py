@@ -1,7 +1,7 @@
 import time
 from gi.repository import Gtk
 import datetime
-import os,shutil,pickle
+import os,shutil,pickle,os.path
 from objs_graphics import *
 from bee_util.queen_bee import calculations as qb_calc
 from bee_util.queen_bee import data as qb_data
@@ -174,6 +174,30 @@ class Volk(object):
 		return csv_str + "\n"
 	def add_stock(self,stock):
 		self.sizes.append((datetime.datetime.today(),stock))
+	def stocks_between(self,_from,_to):
+		_stocks = []
+		for date,stock in self.sizes:
+			if(date > _from and date < _to):
+				_stocks.append(stock)
+		return _stocks
+	def stocks_until(self,until):
+		_stocks = []
+		for date,stock in self.sizes:
+			if( date < until):
+				_stocks.append(stock)
+		return _stocks
+	def stocks_from(self,_from):
+		_stocks = []
+		for date,stock in self.sizes:
+			if( date > _from):
+				_stocks.append(stock)
+		return _stocks
+
+	def all_stocks(self):
+		_stocks = []
+		for date,stock in self.sizes:
+			_stocks.append(stock)
+		return _stocks
 
 class Stock(object):
 	def __init__(self,bees, food, brood, queen_bee, drone_brood, date, note = ""):
@@ -192,13 +216,18 @@ class Stock(object):
 			"notiz":"note",
 			"datum":"date"}
 	def __str__(self):
-		return "Stock({},{},{},{},{},{},{})".format(self.bees, self.food, self.brood, self.queen_bee, self.drone_brood, self.date, self.note)
+		return "Stock({},{},{},{},{},{},{})".format(repr(self.bees), repr(self.food), repr(self.brood), repr(self.queen_bee), repr(self.drone_brood), repr(self.date), repr(self.note))
 	def __repr__(self):
 		return str(self)
 	def to_csv(self,delimiter = ","):
 		csv_str = "stock"
 		for k,v in self.values.items():
-			csv_str += delimiter + getattr(self,v)
+			ele = ""
+			if(isinstance(getattr(self,v) ,datetime.datetime)):
+				ele = k.strftime("%d-%d-%Y")
+			else:
+				ele = str(getattr(self, v))
+			csv_str += delimiter + ele
 		csv_str += "\n"
 		return csv_str
 	def get_csv_header(self,delimiter = ","):
@@ -214,6 +243,18 @@ class Stock(object):
 			xml_str += "\n{0}<{1}>{2}</{1}>".format("\t" * (indent + 1), k, v)
 		xml_str +="\t" * indent + "</stock>\n"
 		return xml_str
+	def to_csv_with_fields(self,fields,delimiter = ","):
+		csv_str = "stock"
+		for k in fields:
+			ele = ""
+			if(isinstance(getattr(self,self.values[k]),datetime.datetime)):
+				ele = getattr(self,self.values[k]).strftime("%d-%d-%Y")
+			else:
+				ele = str(getattr(self,self.values[k]))
+			csv_str += delimiter + ele
+		csv_str += "\n"
+		return csv_str
+
 	
 class Volksverwaltung(object):
 	def __init__(self,voelker=None):
@@ -629,6 +670,25 @@ class MainController(object):
 		stock_note_enable = b.get_object("stock_note_enable")
 		stock_note_entry = b.get_object("stock_note_entry")
 		stock_add = b.get_object("stock_add")
+
+		plot_stocks = b.get_object("plot_stocks")
+		print_stocks  = b.get_object("print_stocks")
+		plot_bees_enable = b.get_object("plot_bees_enable")
+		plot_food_enable = b.get_object("plot_food_enable")
+		plot_queen_bee_enable  = b.get_object("plot_queen_bee_enable")
+		plot_drone_brood_enable = b.get_object("plot_drone_brood_enable")
+		print_bees_enable = b.get_object("print_bees_enable")
+		print_food_enable = b.get_object("print_food_enable")
+		print_queen_bee_enable = b.get_object("print_queen_bee_enable")
+		print_drone_brood_enable  = b.get_object("print_drone_brood_enable")
+		print_note_enable = b.get_object("print_note_enable")
+		plot_stocks_button  = b.get_object("plot_stocks_button")
+		plot_brood_enable = b.get_object("plot_brood_enable")
+		print_brood_enable = b.get_object("print_brood_enable")
+		stock_plot_from_entry = b.get_object("stock_plot_from_entry")
+		stock_plot_to_entry = b.get_object("stock_plot_to_entry")
+
+
 		self.stock_controller = StockInformationController(
 			stock_bee_entry,
 			stock_food_entry,
@@ -638,7 +698,23 @@ class MainController(object):
 			stock_note_enable,
 			stock_note_entry,
 			stock_add,
-			self)
+			self,
+			plot_stocks,
+			print_stocks,
+			plot_bees_enable,
+			plot_food_enable,
+			plot_queen_bee_enable,
+			plot_drone_brood_enable,
+			plot_brood_enable,
+			print_bees_enable,
+			print_food_enable,
+			print_queen_bee_enable,
+			print_drone_brood_enable,
+			print_brood_enable,
+			print_note_enable,
+			plot_stocks_button,
+			stock_plot_from_entry,
+			stock_plot_to_entry)
 		self.stock_controller.__start__()
 
 
@@ -794,7 +870,24 @@ class StockInformationController(object):
 			stock_note_enable,
 			stock_note_entry,
 			stock_add,
-			main_controller
+			main_controller,
+			plot_stocks,
+			print_stocks,
+			plot_bees_enable,
+			plot_food_enable,
+			plot_queen_bee_enable,
+			plot_drone_brood_enable,
+			plot_brood_enable,
+			print_bees_enable,
+			print_food_enable,
+			print_queen_bee_enable,
+			print_drone_brood_enable,
+			print_brood_enable,
+			print_note_enable,
+			plot_stocks_button,
+			stock_plot_from_entry,
+			stock_plot_to_entry
+
 		    ):
 		self.stock_bee_entry = stock_bee_entry  
 		self.stock_food_entry = stock_food_entry  
@@ -805,8 +898,27 @@ class StockInformationController(object):
 		self.stock_note_entry = stock_note_entry 
 		self.stock_add = stock_add
 		self.main_controller = main_controller
+
+		self.plot_stocks = plot_stocks 
+		self.print_stocks  = print_stocks 
+		self.plot_bees_enable = plot_bees_enable 
+		self.plot_food_enable = plot_food_enable 
+		self.plot_queen_bee_enable  = plot_queen_bee_enable 
+		self.plot_drone_brood_enable = plot_drone_brood_enable 
+		self.print_bees_enable = print_bees_enable 
+		self.print_food_enable = print_food_enable 
+		self.print_queen_bee_enable = print_queen_bee_enable 
+		self.print_drone_brood_enable  = print_drone_brood_enable 
+		self.print_note_enable = print_note_enable 
+		self.plot_stocks_button  = plot_stocks_button 
+		self.print_brood_enable  = print_brood_enable 
+		self.plot_brood_enable  = print_brood_enable 
+		self.stock_plot_from_entry = stock_plot_from_entry
+		self.stock_plot_to_entry = stock_plot_to_entry
+
 	def __start__(self):
 		self.stock_add.connect("clicked",self.add_stock)
+		self.plot_stocks_button.connect("clicked",self.do_plot_stocks)
 	def float_from_entry(self,entry):
 		text = entry.get_text()
 		_float = 0
@@ -818,6 +930,16 @@ class StockInformationController(object):
 			entry.set_text("Zahl benoetigt")
 			return
 		return _float
+	def date_from_entry(self,entry, showmsg = False):
+		datestr = entry.get_text()
+		date = None
+		try:
+			date = datetime.datetime.strptime(datestr,"%d-%m-%y")
+		except:
+			if(showmsg):
+				entry.set_text("Format: DD-MM-YY")
+			return
+		return date
 	def add_stock(self,button):
 		bees = self.float_from_entry(self.stock_bee_entry)
 		food = self.float_from_entry(self.stock_food_entry)
@@ -848,4 +970,158 @@ class StockInformationController(object):
 		else:
 			self.main_controller.volksverwaltung.voelker[place].add_stock(
 					Stock(bees,food,brood,has_queen,drone_brood,today,note))
+	def do_plot_stocks(self,button):
+		if(self.plot_stocks.get_active()):
+			self._plot_stocks()
+		elif(self.print_stocks.get_active()):
+			self._print_stocks()
+		else:
+			return
+	def _plot_stocks(self):
+		"""
+		Stock.values = {"bienen":"bees",
+			"futter":"food",
+			"brut":"brood",
+			"dronenbrut":"drone_brood",
+			"koenigin":"queen_bee",
+			"notiz":"note",
+			"datum":"date"}
+
+			"""
+		try:
+			import matplotlib.pyplot as plt
+		except ImportError:
+			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
+					Gtk.ButtonsType.CANCEL, "matplotlib.pyplot nicht installiert")
+			dialog.format_secondary_text(
+					"Sie muessen matplotlib nachinstallieren, (evtl: apt-get install python3-matplolib)")
+			dialog.run()
+			dialog.destroy()
+		to_plot = None
+		if(self.plot_bees_enable.get_active()):
+			to_plot = "bienen"
+		if(self.plot_food_enable.get_active()):
+			to_plot = "futter"
+		if(self.plot_queen_bee_enable.get_active()):
+			to_plot = "koenigin"
+		if(self.plot_drone_brood_enable.get_active()):
+			to_plot = "dronenbrut"
+		if(self.plot_brood_enable.get_active()):
+			to_plot = "brut"
+
+		# now get the active iter
+		sel=self.main_controller.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.main_controller.t1_model[row][0]
+		for volk in self.main_controller.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		volk = self.main_controller.volksverwaltung.voelker[place]
+
+		_from = self.date_from_entry(self.stock_plot_from_entry)
+		_to = self.date_from_entry(self.stock_plot_to_entry)
+
+		stocks = []
+		if(_from == None and _to == None):
+			stocks = volk.all_stocks()
+		elif(_from == None and _to != None):
+			stocks = volk.stocks_until(_to)
+		elif(_from != None and _to == None):
+			stocks = volk.stocks_from(_from)
+		else:
+			stocks = volk.stocks_between(_from,_to)
+		x = [ i.date for i in stocks]
+		y = [getattr(i,i.values[to_plot]) for i in stocks]
+		y = self.reformat_for_plot(y)
+		plt.plot(x,y,"r-")
+		plt.show()
+
+
+	def reformat_for_plot(self,arr):
+		_arr = []
+		for a in arr:
+			if(a == False):
+				_arr.append(0)
+			elif(a == True):
+				_arr.append(1)
+			else:
+				_arr.append(a)
+		return _arr
+
+	def _print_stocks(self):
+		"""
+		Stock.values = {"bienen":"bees",
+			"futter":"food",
+			"brut":"brood",
+			"dronenbrut":"drone_brood",
+			"koenigin":"queen_bee",
+			"notiz":"note",
+			"datum":"date"}
+
+			"""
+		to_print = ["datum"]
+		if(self.print_bees_enable.get_active()):
+			to_print.append("bienen")
+		if(self.print_food_enable.get_active()):
+			to_print.append("futter")
+		if(self.print_queen_bee_enable.get_active()):
+			to_print.append("koenigin")
+		if(self.print_drone_brood_enable.get_active()):
+			to_print.append("dronenbrut")
+		if(self.print_brood_enable.get_active()):
+			to_print.append("brut")
+		if(self.print_note_enable.get_active()):
+			to_print.append("notiz")
+		# now get the active iter
+		sel=self.main_controller.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.main_controller.t1_model[row][0]
+		for volk in self.main_controller.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		volk = self.main_controller.volksverwaltung.voelker[place]
+
+		_from = self.date_from_entry(self.stock_plot_from_entry)
+		_to = self.date_from_entry(self.stock_plot_to_entry)
+
+		stocks = []
+		if(_from == None and _to == None):
+			stocks = volk.all_stocks()
+		elif(_from == None and _to != None):
+			stocks = volk.stocks_until(_to)
+		elif(_from != None and _to == None):
+			stocks = volk.stocks_from(_from)
+		else:
+			stocks = volk.stocks_between(_from,_to)
+
+		# build the show-dialog
+		print_builder = Gtk.Builder()
+		# unluckily we have got a lot of possible filelocations
+		locs = ("etc/stock_export_dialog.glade",
+				"/etc/BeeKeeper/stock_export_dialog.glade",
+				"~/.BeeKeeper/etc/stock_export_dialog.glade")
+		for loc in locs:
+			if(os.path.exists(loc)):
+				print_builder.add_from_file(loc)
+				break
+		print_dialog = print_builder.get_object("print_stocks_dialog")
+		print_view = print_builder.get_object("stock_view")
+		print_buffer = Gtk.TextBuffer()
+		print_view.set_editable(False)
+
+		# get the actual data
+		text ="bestand,\t" + ",\t".join(to_print) + "\n"
+		text += "".join([ i.to_csv_with_fields(to_print,delimiter = ",\t") for i in stocks])
+		print_buffer.set_text(text)
+		print_view.set_buffer(print_buffer)
+		
+		print_dialog.show_all()
+
+
+
+
 
