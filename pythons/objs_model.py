@@ -184,11 +184,36 @@ class Stock(object):
 		self.queen_bee = queen_bee
 		self.note = note
 		self.date = date
+		self.values = {"bienen":"bees",
+			"futter":"food",
+			"brut":"brood",
+			"dronenbrut":"drone_brood",
+			"koenigin":"queen_bee",
+			"notiz":"note",
+			"datum":"date"}
 	def __str__(self):
 		return "Stock({},{},{},{},{},{},{})".format(self.bees, self.food, self.brood, self.queen_bee, self.drone_brood, self.date, self.note)
 	def __repr__(self):
 		return str(self)
+	def to_csv(self,delimiter = ","):
+		csv_str = "stock"
+		for k,v in self.values.items():
+			csv_str += delimiter + getattr(self,v)
+		csv_str += "\n"
+		return csv_str
+	def get_csv_header(self,delimiter = ","):
+		csv_str = "stock"
+		for k,v in self.values.items():
+			csv_str += delimiter + k
+		csv_str += "\n"
+		return csv_str
 
+	def to_xml(self, indent = 0):
+		xml_str ="\t" * indent +  "<stock>"
+		for k,v in self.values.items():
+			xml_str += "\n{0}<{1}>{2}</{1}>".format("\t" * (indent + 1), k, v)
+		xml_str +="\t" * indent + "</stock>\n"
+		return xml_str
 	
 class Volksverwaltung(object):
 	def __init__(self,voelker=None):
@@ -823,5 +848,4 @@ class StockInformationController(object):
 		else:
 			self.main_controller.volksverwaltung.voelker[place].add_stock(
 					Stock(bees,food,brood,has_queen,drone_brood,today,note))
-		print(self.main_controller.volksverwaltung.voelker[place].sizes)
 

@@ -181,7 +181,7 @@ else
 	echo "done."
 
 	echo "copiyng over desktop file ..."
-	sudo cp etc/BeeKeeper.desktop.nonlocal /usr/share/applications
+	sudo cp etc/BeeKeeper.desktop.nonlocal /usr/share/applications/BeeKeeper.desktop
 	echo "done"
 fi
 
