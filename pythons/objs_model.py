@@ -995,7 +995,7 @@ class StockInformationController(object):
 			dialog = Gtk.MessageDialog(self.main_controller.mainw, 0, Gtk.MessageType.ERROR,
 					Gtk.ButtonsType.CANCEL, "matplotlib.pyplot nicht installiert")
 			dialog.format_secondary_text(
-					"Sie muessen matplotlib nachinstallieren, (evtl: apt-get install python3-matplolib)")
+					"Sie muessen matplotlib nachinstallieren, (evtl: apt-get install python3-matplotlib)")
 			dialog.run()
 			dialog.destroy()
 		to_plot = None
