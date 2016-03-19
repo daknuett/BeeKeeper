@@ -1,7 +1,7 @@
 #!/bin/bash
 
 pyfiles=(main.py pythons/objs_model.py pythons/objs_main.py pythons/objs_graphics.py bee_util/__init__.py bee_util/queen_bee/__init__.py bee_util/queen_bee/data.py bee_util/queen_bee/calculations.py )
-etcfiles=(BeeKeeperMain.glade micon.png BeeKeeperAbout.glade)
+etcfiles=(BeeKeeperMain.glade micon.png BeeKeeperAbout.glade stock_export_dialog.glade)
 
 dirs=(pythons/ bee_util/ bee_util/queen_bee/)
 yes="j"

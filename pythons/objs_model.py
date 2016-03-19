@@ -912,7 +912,7 @@ class StockInformationController(object):
 		self.print_note_enable = print_note_enable 
 		self.plot_stocks_button  = plot_stocks_button 
 		self.print_brood_enable  = print_brood_enable 
-		self.plot_brood_enable  = print_brood_enable 
+		self.plot_brood_enable  = plot_brood_enable 
 		self.stock_plot_from_entry = stock_plot_from_entry
 		self.stock_plot_to_entry = stock_plot_to_entry
 
@@ -991,7 +991,7 @@ class StockInformationController(object):
 		try:
 			import matplotlib.pyplot as plt
 		except ImportError:
-			dialog = Gtk.MessageDialog(self, 0, Gtk.MessageType.ERROR,
+			dialog = Gtk.MessageDialog(self.main_controller, 0, Gtk.MessageType.ERROR,
 					Gtk.ButtonsType.CANCEL, "matplotlib.pyplot nicht installiert")
 			dialog.format_secondary_text(
 					"Sie muessen matplotlib nachinstallieren, (evtl: apt-get install python3-matplolib)")
@@ -999,15 +999,21 @@ class StockInformationController(object):
 			dialog.destroy()
 		to_plot = None
 		if(self.plot_bees_enable.get_active()):
+			print("bienen")
 			to_plot = "bienen"
 		if(self.plot_food_enable.get_active()):
+			print("futter")
 			to_plot = "futter"
 		if(self.plot_queen_bee_enable.get_active()):
+			print("koenigin")
 			to_plot = "koenigin"
 		if(self.plot_drone_brood_enable.get_active()):
+			print("dronenbrut")
 			to_plot = "dronenbrut"
 		if(self.plot_brood_enable.get_active()):
+			print("brut")
 			to_plot = "brut"
+		print(to_plot)
 
 		# now get the active iter
 		sel=self.main_controller.t1.get_selection()
