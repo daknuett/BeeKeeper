@@ -290,7 +290,8 @@ class Volksverwaltung(object):
 		voelker.close()
 
 class MainController(object):
-	def __init__(self):
+	def __init__(self,mainw = None):
+		self.mainw = mainw
 		self.t1_model = None
 		self.t2_model = None
 		self.t3_model = None
@@ -991,7 +992,7 @@ class StockInformationController(object):
 		try:
 			import matplotlib.pyplot as plt
 		except ImportError:
-			dialog = Gtk.MessageDialog(self.main_controller, 0, Gtk.MessageType.ERROR,
+			dialog = Gtk.MessageDialog(self.main_controller.mainw, 0, Gtk.MessageType.ERROR,
 					Gtk.ButtonsType.CANCEL, "matplotlib.pyplot nicht installiert")
 			dialog.format_secondary_text(
 					"Sie muessen matplotlib nachinstallieren, (evtl: apt-get install python3-matplolib)")

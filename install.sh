@@ -93,9 +93,9 @@ then
 		echo "~/.local/share/applications does not exist. cannot install."
 		exit 1
 	fi
-	cp etc/BeeKeeper.desktop ~/.local/share/applications/BeeKeeper.desktop
+	cp BeeKeeper.desktop ~/.local/share/applications/BeeKeeper.desktop
 	chmod +x ~/.local/share/applications/BeeKeeper.desktop
-	rm etc/BeeKeeper.desktop
+	rm BeeKeeper.desktop
 	echo "done."
 
 	

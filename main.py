@@ -1,11 +1,14 @@
 from gi.repository import Gtk
 import sys
-# python files have been moved
-sys.path.append("pythons/")
-from objs_main import *
-from objs_model import *
 import pickle
 import os
+# python files have been moved
+sys.path.append("pythons/")
+sys.path.append(os.path.expanduser("~/.BeeKeeper/pys/pythons"))
+from objs_main import *
+from objs_model import *
+
+test = False
 
 def show_about(*args):
 	about_builder=Gtk.Builder()
@@ -20,7 +23,6 @@ def show_about(*args):
 	about = about_builder.get_object("aboutdialog1")
 	about.show_all()
 
-test = False
 
 if(not os.path.exists(os.getenv("HOME")+"/.BeeKeeper")):
 	print("~/.BeeKeeper does not exist, generating it")
@@ -38,7 +40,7 @@ if(not test):
 	except:
 		builder.add_from_file("/etc/BeeKeeper/BeeKeeperMain.glade")
 else:
-	builder.add_from_file("BeeKeeperMain.glade")
+	builder.add_from_file("etc/BeeKeeperMain.glade")
 w = builder.get_object("applicationwindow1")
 
 abm = builder.get_object("menu3")
@@ -49,7 +51,7 @@ else:
 	abd.connect("activate",show_about)
 	abm.append(abd)
 
-maincontroller = MainController()
+maincontroller = MainController(w)
 maincontroller.load_volksverwaltung()
 maincontroller.build_from_builder(builder)
 
