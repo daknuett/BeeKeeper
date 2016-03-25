@@ -262,32 +262,52 @@ class Volksverwaltung(object):
 			self.voelker=[]
 		else:
 			self.voelker=voelker
+		
+		self.voelker_dead = []
 	def add_volk(self,volk):
+		self.update_current_version()
 		self.voelker.append(volk)
 	def del_volk(self,pos):
+		self.update_current_version()
 		del(self.voelker[pos])
 	def kill_volk(self,pos,reason):
+		self.update_current_version()
 		volk = self.voelker[pos]
 		volk.dead = True
 		volk.death_reason = reason
 		volk.death_date = datetime.datetime.today()
-		self.voelker[pos] = volk
+		self.voelker_dead[pos] = volk
 
 	def to_xml(self,indent=0):
+		self.update_current_version()
 		xml_str=""
 		xml_str+="\t"*indent
 		xml_str+="<voelker>\n"
 		for volk in self.voelker:
 			xml_str+=volk.to_xml(indent+1)
+		for volk in self.voelker_dead:
+			xml_str+=volk.to_xml(indent+1)
 		xml_str+="\t"*indent
 		xml_str+="</voelker>\n"
 		return xml_str
 	def to_csv(self,pathspec="./",separator=","):
+		self.update_current_version()
 		voelker = open(pathspec + "voelker.csv","w")	
 		voelker.write(self.voelker[0].get_header(separator))
 		for volk in self.voelker:
 			voelker.write(volk.to_csv(pathspec,separator))
+		for volk in self.voelker_dead:
+			voelker.write(volk.to_csv(pathspec,separator))
 		voelker.close()
+	def update_current_version(self):
+		if (not hasattr(self,"voelker_dead")):
+			self.voelker_dead = []
+			for volk in self.voelker:
+				if(volk.is_dead()):
+					self.voelker_dead.append(volk)
+			for i,volk in enumerate(self.voelker):
+				if(volk.is_dead()):
+					del(self.voelker[i])
 
 class MainController(object):
 	def __init__(self,mainw = None):
@@ -590,6 +610,7 @@ class MainController(object):
 
 		chooser.destroy()
 		self.load_volksverwaltung()
+		self.volksverwaltung.update_current_version()
 	def export_data(self,*args):
 		dialog=ExportDialog(self.window)
 		response=dialog.run()
@@ -813,6 +834,7 @@ class MainController(object):
 			volksverwaltung=Volksverwaltung()
 			volksverwaltung.add_volk(Volk("TestVolk","Haus",10))
 		self.volksverwaltung= volksverwaltung
+		self.volksverwaltung.update_current_version()
 		
 
 class InformationController(object):
