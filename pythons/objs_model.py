@@ -134,6 +134,10 @@ class Volk(object):
 		if(not hasattr(self,"sizes")):
 			self.old_groesse = [(datetime.datetime.today(),self.groesse)]
 			self.sizes = []
+		if(not hasattr(self,"notes")):
+			self.notes = []
+			self.dates = []
+			print("WARNING: adding attr <notes> and <dates>")
 
 	def to_xml(self,indent = 0):
 		self.update_current_version()
@@ -145,9 +149,11 @@ class Volk(object):
 			xml_str+="\t"*(indent+1)
 			xml_str+='<property name="{0}">{1}</property>\n'.format(name,getattr(self,entity))
 		for futter in self.futterlist:
-			xml_str+=futter.to_xml(indent+1)
+			xml_str+=futter.to_xml(indent + 1)
 		for med in self.medikamentenlist:
-			xml_str+=med.to_xml(indent+1)
+			xml_str+=med.to_xml(indent + 1)
+		for note in self.notes:
+			xml_str += note.to_xml(indent + 1)
 		xml_str+="\t"*indent
 		xml_str+="</volk>\n"
 		return xml_str
@@ -163,6 +169,9 @@ class Volk(object):
 		for med in self.medikamentenlist:
 			meds.write(med.to_csv(separator))
 		meds.close()
+		notes = open(_name + "_notes.csv","w")
+		for note in self.notes:
+			notes.write(note.to_csv(separator))
 		csv_str = "volk"
 		for name,entity in self.xml_values.items():
 			csv_str += '{0}{1}'.format(separator,getattr(self,entity))
@@ -198,6 +207,53 @@ class Volk(object):
 		for date,stock in self.sizes:
 			_stocks.append(stock)
 		return _stocks
+	def add_note(self, note):
+		self.notes.append(note)
+	def note_at(self, date):
+		for note in self.notes:
+			if( (note.date - date).days == 0):
+				return note
+	def note_by_title(self,title):
+		for note in self.notes:
+			if(note.is_title(title)):
+				return note
+	def note_by_title_contains(self,txt):
+		for note in self.notes:
+			if(note.title_contains(txt)):
+				return note
+
+		
+	def all_notes(self):
+		_notes = []
+		for note in self.notes:
+			_notes.append(note)
+		return _notes
+	
+
+class Note(object):
+	def __init__(self,title,date,text):
+		self.title = title
+		self.date = date
+		self.text = text
+	def is_title(self, txt):
+		return self.title == txt
+	def title_contains(self,txt):
+		return txt in self.title
+	def to_xml(self, indent = 0):
+		indent_str = "\t"  * indent
+		more_indent = "\t" * (indent + 1)
+		indent = indent_str
+		return "{indent}<Note> \n{more_indent}<date>{date}</date> \n{more_indent}<title>{title}</title> \n{more_indent}<text>{text}</text>  \n{indent}</Note>".format(indent = indent,
+				more_indent = more_indent,
+				text = self.text,
+				date = self.date,
+				title = self.title)
+	def to_csv(self, seperator = ","):
+		return "note{comma}{title}{comma}{date}{comma}{text}".format(comma = separator,
+				text = self.text,
+				date = self.date,
+				title = self.title)
+				
 
 class Stock(object):
 	def __init__(self,bees, food, brood, queen_bee, drone_brood, date, note = ""):
@@ -739,6 +795,30 @@ class MainController(object):
 			stock_plot_to_entry)
 		self.stock_controller.__start__()
 
+		add_note_button = b.get_object("add_note_button")
+		note_text_field = b.get_object("note_text_field")
+		note_title_entry = b.get_object("note_title_entry")
+		search_by_date = b.get_object("search_by_date")
+		search_by_title = b.get_object("search_by_title")
+		title_contains = b.get_object("title_contains")
+		title_is = b.get_object("title_is")
+		title_search_entry = b.get_object("title_search_entry")
+		note_search_calendar = b.get_object("note_search_calendar")
+		search_note_button = b.get_object("search_note_button")
+		note_display_text = b.get_object("note_display_text")
+		self.note_controller = NoteController(self,
+				add_note_button,
+				note_text_field,
+				note_title_entry,
+				search_by_date,
+				search_by_title,
+				title_contains,
+				title_is,
+				title_search_entry,
+				note_search_calendar,
+				search_note_button,
+				note_display_text)
+
 
 
 
@@ -835,6 +915,17 @@ class MainController(object):
 			volksverwaltung.add_volk(Volk("TestVolk","Haus",10))
 		self.volksverwaltung= volksverwaltung
 		self.volksverwaltung.update_current_version()
+	def get_active_volk(self):
+		sel=self.t1.get_selection()
+		model,row=sel.get_selected()
+		place=0
+		vname=self.t1_model[row][0]
+		for volk in self.volksverwaltung.voelker:
+			if(volk.name==vname):
+				break
+			place+=1
+		volk = self.volksverwaltung.voelker[place]
+		return volk
 		
 
 class InformationController(object):
@@ -1150,6 +1241,89 @@ class StockInformationController(object):
 		
 		print_dialog.show_all()
 
+
+
+
+class NoteController(object):
+	def __init__(self,
+			maincontroller,
+			add_note_button,
+			note_text_field,
+			note_title_entry,
+			search_by_date,
+			search_by_title,
+			title_contains,
+			title_is,
+			title_search_entry,
+			note_search_calendar,
+			search_note_button,
+			note_display_text):
+		
+		self.maincontroller = maincontroller
+		self.add_note_button = add_note_button
+		self.note_text_field = note_text_field
+		self.note_title_entry = note_title_entry
+		self.search_by_date = search_by_date
+		self.search_by_title = search_by_title
+		self.title_contains = title_contains
+		self.title_is = title_is
+		self.title_search_entry = title_search_entry
+		self.note_search_calendar = note_search_calendar
+		self.search_note_button = search_note_button
+		self.note_display_text = note_display_text
+		self.note_text_field_buffer = note_text_field.get_buffer()
+		self.note_display_text_buffer = self.note_display_text.get_buffer()
+		self.__start__()
+	def __start__(self):
+		self.add_note_button.connect("clicked",self.add_note)
+		self.note_text_field.set_editable(True)
+		self.note_display_text.set_editable(False)
+		self.search_note_button.connect("clicked",self.search_note)
+
+	def add_note(self, *args):
+		active_volk = self.maincontroller.get_active_volk()
+		start,stop = self.note_text_field_buffer.get_bounds()
+		title = self.note_title_entry.get_text()
+		text = self.note_text_field_buffer.get_text(start,stop,True)
+		today = datetime.datetime.today()
+		active_volk.add_note(Note(title,today,text))
+	def search_note_by_date(self):
+		active_volk = self.maincontroller.get_active_volk()
+		year,month,day = self.note_search_calendar.get_date()
+		date = datetime.datetime(year, month , day)
+		note = active_volk.note_at(date)
+		self.display_note(note)
+	def search_by_is_title(self):
+		active_volk = self.maincontroller.get_active_volk()
+		title = self.note_title_entry.get_text()
+		note = active_volk.note_by_title(title)
+		self.display_note(note)
+	def search_by_title_contains(self):
+		active_volk = self.maincontroller.get_active_volk()
+		title = self.note_title_entry.get_text()
+		note = active_volk.note_by_title_contains(title)
+		self.display_note(note)
+
+
+	def display_note(self,note):
+		start, stop = self.note_display_text_buffer.get_bounds()
+		self.note_display_text_buffer.delete(start,stop)
+		start = self.note_display_text_buffer.get_start_iter()
+		self.note_display_text_buffer.insert(start,note.text)
+
+	def search_note(self,*args):
+		if(self.search_by_date.get_active()):
+			self.search_note_by_date()
+		else:
+			if(self.title_contains.get_active()):
+				self.search_by_title_contains()
+			else:
+				self.search_by_is_title()
+
+
+
+	
+		
 
 
 
