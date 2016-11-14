@@ -10,7 +10,7 @@ from bee_util.queen_bee import data as qb_data
 class Spendable(object):
 	pass
 
-class Futter(Spendable):
+class Food(Spendable):
 	def __init__(self,name,menge,preis_pro_menge,datum):
 		self.name=name
 		self.menge=menge
@@ -81,7 +81,7 @@ class Medikament(Spendable):
 		csv_str+="medikament{0}{1}{0}{2}{0}{3}\n".format(separator,self.name,self.menge,self.preis_pro_menge)
 		return csv_str
 
-class Volk(object):
+class Comb(object):
 	def __init__(self,name,ort,groesse):
 		self.name = name
 		self.ort = ort
@@ -140,7 +140,7 @@ class Volk(object):
 	
 		xml_str=""
 		xml_str+="\t"*indent
-		xml_str+='<volk name="{0}">\n'.format(self.name)
+		xml_str+='<comb name="{0}">\n'.format(self.name)
 		for name,entity in self.xml_values.items():
 			xml_str+="\t"*(indent+1)
 			xml_str+='<property name="{0}">{1}</property>\n'.format(name,getattr(self,entity))
@@ -149,11 +149,11 @@ class Volk(object):
 		for med in self.medikamentenlist:
 			xml_str+=med.to_xml(indent+1)
 		xml_str+="\t"*indent
-		xml_str+="</volk>\n"
+		xml_str+="</comb>\n"
 		return xml_str
 	def to_csv(self,pathspec="./",separator=","):
 		self.update_current_version()
-		"""unlike Futter.to_csv or Medikament.to_csv this will write everyting to a file"""
+		"""unlike Food.to_csv or Medikament.to_csv this will write everyting to a file"""
 		_name=pathspec+self.name.replace(" ","_")
 		foods=open(_name+"_futter.csv","w")
 		for futter in self.futterlist:
@@ -163,12 +163,12 @@ class Volk(object):
 		for med in self.medikamentenlist:
 			meds.write(med.to_csv(separator))
 		meds.close()
-		csv_str = "volk"
+		csv_str = "comb"
 		for name,entity in self.xml_values.items():
 			csv_str += '{0}{1}'.format(separator,getattr(self,entity))
 		return csv_str + "\n"
 	def get_header(self,separator = ","):
-		csv_str = "volk"
+		csv_str = "comb"
 		for name,entity in self.xml_values.items():
 			csv_str += '{0}{1}'.format(separator,name)
 		return csv_str + "\n"
@@ -256,58 +256,58 @@ class Stock(object):
 		return csv_str
 
 	
-class Volksverwaltung(object):
-	def __init__(self,voelker=None):
-		if voelker==None:
-			self.voelker=[]
+class CombDB(object):
+	def __init__(self,combs=None):
+		if combs==None:
+			self.combs=[]
 		else:
-			self.voelker=voelker
+			self.combs=combs
 		
-		self.voelker_dead = []
-	def add_volk(self,volk):
+		self.combs_dead = []
+	def add_comb(self,comb):
 		self.update_current_version()
-		self.voelker.append(volk)
-	def del_volk(self,pos):
+		self.combs.append(comb)
+	def del_comb(self,pos):
 		self.update_current_version()
-		del(self.voelker[pos])
-	def kill_volk(self,pos,reason):
+		del(self.combs[pos])
+	def kill_comb(self,pos,reason):
 		self.update_current_version()
-		volk = self.voelker[pos]
-		volk.dead = True
-		volk.death_reason = reason
-		volk.death_date = datetime.datetime.today()
-		self.voelker_dead[pos] = volk
+		comb = self.combs[pos]
+		comb.dead = True
+		comb.death_reason = reason
+		comb.death_date = datetime.datetime.today()
+		self.combs_dead[pos] = comb
 
 	def to_xml(self,indent=0):
 		self.update_current_version()
 		xml_str=""
 		xml_str+="\t"*indent
-		xml_str+="<voelker>\n"
-		for volk in self.voelker:
-			xml_str+=volk.to_xml(indent+1)
-		for volk in self.voelker_dead:
-			xml_str+=volk.to_xml(indent+1)
+		xml_str+="<combs>\n"
+		for comb in self.combs:
+			xml_str+=comb.to_xml(indent+1)
+		for comb in self.combs_dead:
+			xml_str+=comb.to_xml(indent+1)
 		xml_str+="\t"*indent
-		xml_str+="</voelker>\n"
+		xml_str+="</combs>\n"
 		return xml_str
 	def to_csv(self,pathspec="./",separator=","):
 		self.update_current_version()
-		voelker = open(pathspec + "voelker.csv","w")	
-		voelker.write(self.voelker[0].get_header(separator))
-		for volk in self.voelker:
-			voelker.write(volk.to_csv(pathspec,separator))
-		for volk in self.voelker_dead:
-			voelker.write(volk.to_csv(pathspec,separator))
-		voelker.close()
+		combs = open(pathspec + "combs.csv","w")	
+		combs.write(self.combs[0].get_header(separator))
+		for comb in self.combs:
+			combs.write(comb.to_csv(pathspec,separator))
+		for comb in self.combs_dead:
+			combs.write(comb.to_csv(pathspec,separator))
+		combs.close()
 	def update_current_version(self):
-		if (not hasattr(self,"voelker_dead")):
-			self.voelker_dead = []
-			for volk in self.voelker:
-				if(volk.is_dead()):
-					self.voelker_dead.append(volk)
-			for i,volk in enumerate(self.voelker):
-				if(volk.is_dead()):
-					del(self.voelker[i])
+		if (not hasattr(self,"combs_dead")):
+			self.combs_dead = []
+			for comb in self.combs:
+				if(comb.is_dead()):
+					self.combs_dead.append(comb)
+			for i,comb in enumerate(self.combs):
+				if(comb.is_dead()):
+					del(self.combs[i])
 
 class MainController(object):
 	def __init__(self,mainw = None):
@@ -330,7 +330,7 @@ class MainController(object):
 		self.med_name_ent = None
 		self.med_size_ent = None
 		self.med_cost_ent = None
-		self.volksverwaltung = None
+		self.combDB = None
 		self.archived = None
 		self.new_name_ent=None
 		self.new_ort_ent = None
@@ -347,49 +347,49 @@ class MainController(object):
 		self.savename = "bees.pik"
 
 	def build_t1_model(self):
-		for volk in self.volksverwaltung.voelker:
+		for comb in self.combDB.combs:
 			try:
-				if volk.is_dead():
+				if comb.is_dead():
 					continue
 			except:
 				pass
-			self.t1_model.append((volk.name,volk.ort,volk.groesse))
+			self.t1_model.append((comb.name,comb.ort,comb.groesse))
 	def build_t1_model_with_dead(self):
-		for volk in self.volksverwaltung.voelker:
-			if volk.is_dead():
-				self.t1_model.append((volk.name + "  (tot)",volk.ort,volk.groesse))
+		for comb in self.combDB.combs:
+			if comb.is_dead():
+				self.t1_model.append((comb.name + "  (tot)",comb.ort,comb.groesse))
 			else:
-				self.t1_model.append((volk.name,volk.ort,volk.groesse))
+				self.t1_model.append((comb.name,comb.ort,comb.groesse))
 
 ### ACTIONS ###
 	def name_changed(self,widget,path,text):
 		self.t1_model[path][0] = text
-		self.volksverwaltung.voelker[int(path)].name = text
+		self.combDB.combs[int(path)].name = text
 	def food_val_changed(self,widget,path,text):
 		self.t2_model[path][2] = float(text)
-		self.volksverwaltung.voelker[self.food_stats_volk_index].change_size_by_date(self.t2_model[path][3],float(self.t2_model[path][2]))
+		self.combDB.combs[self.food_stats_comb_index].change_size_by_date(self.t2_model[path][3],float(self.t2_model[path][2]))
 	def ort_changed(self,widget,path,text):
 		self.t1_model[path][1] = text
-		self.volksverwaltung.voelker[int(path)].ort = text
+		self.combDB.combs[int(path)].ort = text
 	def groesse_changed(self,widget,path,text):
 		self.t1_model[path][2] = int(text)
-		self.volksverwaltung.voelker[int(path)].old_groesse.append((datetime.datetime.today(),self.volksverwaltung.voelker[int(path)].groesse))
-		self.volksverwaltung.voelker[int(path)].groesse = int(text)
+		self.combDB.combs[int(path)].old_groesse.append((datetime.datetime.today(),self.combDB.combs[int(path)].groesse))
+		self.combDB.combs[int(path)].groesse = int(text)
 	def save_and_exit(self,*args):
-		pickle.dump(self.volksverwaltung,open(self.savename,"wb"))
+		pickle.dump(self.combDB,open(self.savename,"wb"))
 		Gtk.main_quit(*args)
-	def del_volk(self,button):
+	def del_comb(self,button):
 		sel = self.t1.get_selection()
 		model,row = sel.get_selected()
 		place = 0
 		name = self.t1_model[row][0]
-		for volk in self.volksverwaltung.voelker:
-			if(volk.name == name):
+		for comb in self.combDB.combs:
+			if(comb.name == name):
 				break
 			place += 1
-		del(self.volksverwaltung.voelker[place])
+		del(self.combDB.combs[place])
 		del(self.t1_model[row])
-	def add_volk(self,button):
+	def add_comb(self,button):
 		name = self.new_name_ent.get_text()
 		if(name == ""):
 			self.new_name_ent.set_text("Name benötigt")
@@ -403,19 +403,19 @@ class MainController(object):
 		except:
 			self.new_size_ent.set_text("Größe als Zahl angeben")
 			return
-		newVolk=Volk(name,ort,groesse)
-		self.volksverwaltung.add_volk(newVolk)
-		self.t1_model.append((newVolk.name,newVolk.ort,newVolk.groesse))
-	def kill_volk(self,button):
+		newComb=Comb(name,ort,groesse)
+		self.combDB.add_comb(newComb)
+		self.t1_model.append((newComb.name,newComb.ort,newComb.groesse))
+	def kill_comb(self,button):
 		sel = self.t1.get_selection()
 		model,row = sel.get_selected()
 		place = 0
 		name = self.t1_model[row][0]
-		for volk in self.volksverwaltung.voelker:
-			if(volk.name == name):
+		for comb in self.combDB.combs:
+			if(comb.name == name):
 				break
 			place += 1
-		self.volksverwaltung.kill_volk(place,self.death_reason_ent.get_text())
+		self.combDB.kill_comb(place,self.death_reason_ent.get_text())
 		del(self.t1_model[row])
 
 		
@@ -443,11 +443,11 @@ class MainController(object):
 		model,row=sel.get_selected()
 		place=0
 		vname=self.t1_model[row][0]
-		for volk in self.volksverwaltung.voelker:
-			if(volk.name==vname):
+		for comb in self.combDB.combs:
+			if(comb.name==vname):
 				break
 			place+=1
-		self.volksverwaltung.voelker[place].fuettern(Futter(name,menge,preis,datetime.date.today()))
+		self.combDB.combs[place].fuettern(Food(name,menge,preis,datetime.date.today()))
 	def add_med(self,button):
 		name=self.med_name_ent.get_text()
 		if(name==""):
@@ -471,11 +471,11 @@ class MainController(object):
 		model,row=sel.get_selected()
 		place=0
 		vname=self.t1_model[row][0]
-		for volk in self.volksverwaltung.voelker:
-			if(volk.name==vname):
+		for comb in self.combDB.combs:
+			if(comb.name==vname):
 				break
 			place+=1
-		self.volksverwaltung.voelker[place].medikament_geben(Medikament(name,menge,preis,datetime.date.today()))
+		self.combDB.combs[place].medikament_geben(Medikament(name,menge,preis,datetime.date.today()))
 
 	def build_food_stats(self,ent):
 		self.show_food_stats(self.stat_food_ent.get_text())
@@ -503,12 +503,12 @@ class MainController(object):
 			vname=self.t1_model[row][0]
 		except:
 			return
-		for volk in self.volksverwaltung.voelker:
-			if(volk.name==vname):
+		for comb in self.combDB.combs:
+			if(comb.name==vname):
 				break
 			place+=1
-		meds=self.volksverwaltung.voelker[place].medikamentenlist
-		foods=self.volksverwaltung.voelker[place].futterlist
+		meds=self.combDB.combs[place].medikamentenlist
+		foods=self.combDB.combs[place].futterlist
 		stat_foods=[]
 		for futter in foods:
 			if(futter.datum>=da):
@@ -542,12 +542,12 @@ class MainController(object):
 		except Exception as e:
 			print(e)
 			return
-		for volk in self.volksverwaltung.voelker:
-			if(volk.name==vname):
+		for comb in self.combDB.combs:
+			if(comb.name==vname):
 				break
 			place+=1
-		self.food_stats_volk_index=place
-		foods = self.volksverwaltung.voelker[place].futterlist
+		self.food_stats_comb_index=place
+		foods = self.combDB.combs[place].futterlist
 		stat_foods = []
 		for futter in foods:
 			if(futter.datum>=da):
@@ -574,11 +574,11 @@ class MainController(object):
 			vname=self.t1_model[row][0]
 		except:
 			return
-		for volk in self.volksverwaltung.voelker:
-			if(volk.name==vname):
+		for comb in self.combDB.combs:
+			if(comb.name==vname):
 				break
 			place+=1
-		meds=self.volksverwaltung.voelker[place].medikamentenlist
+		meds=self.combDB.combs[place].medikamentenlist
 		stat_meds=[]
 		for med in meds:
 			if(med.datum>=da):
@@ -592,7 +592,7 @@ class MainController(object):
 		response=chooser.run()
 		if(response==Gtk.ResponseType.OK):
 			fname=chooser.get_filename()
-			pickle.dump(self.volksverwaltung,open(fname,"wb"))
+			pickle.dump(self.combDB,open(fname,"wb"))
 		chooser.destroy()
 	def import_from_file(self,*args):
 		chooser=Gtk.FileChooserDialog("Backupdatei zum Import wählen",self.window,Gtk.FileChooserAction.OPEN,(Gtk.STOCK_CANCEL,Gtk.ResponseType.CANCEL,Gtk.STOCK_OPEN,Gtk.ResponseType.OK))
@@ -600,8 +600,8 @@ class MainController(object):
 		if(response == Gtk.ResponseType.OK):
 			fname = chooser.get_filename()
 			try:
-				volksverwaltung = pickle.load(open(fname,"rb"))
-				self.volksverwaltung = volksverwaltung
+				combDB = pickle.load(open(fname,"rb"))
+				self.combDB = combDB
 			except Exception as e:
 				print(e)
 			self.t1_model = Gtk.ListStore(str,str,int)
@@ -609,8 +609,8 @@ class MainController(object):
 			self.build_t1_model()
 
 		chooser.destroy()
-		self.load_volksverwaltung()
-		self.volksverwaltung.update_current_version()
+		self.load_combDB()
+		self.combDB.update_current_version()
 	def export_data(self,*args):
 		dialog=ExportDialog(self.window)
 		response=dialog.run()
@@ -619,9 +619,9 @@ class MainController(object):
 			return
 		todo_export=dialog.selection_type
 		if(todo_export=="CSV"):
-			self.volksverwaltung.to_csv(pathspec=dialog.selection_folder+"/")
+			self.combDB.to_csv(pathspec=dialog.selection_folder+"/")
 		else:
-			txt=self.volksverwaltung.to_xml()
+			txt=self.combDB.to_xml()
 			f=open(dialog.selection_folder+"/export-"+str(int(time.time()))+".xml","w")
 			f.write(txt)
 			f.close()
@@ -656,14 +656,14 @@ class MainController(object):
 		self.stat_all_ent = b.get_object("entry12")
 
 		self.death_reason_ent = b.get_object("entry13")
-		self.kill_volk_button = b.get_object("button5")
+		self.kill_comb_button = b.get_object("button5")
 
 		self.stat_food_ent.connect("activate",self.build_food_stats)
 		self.stat_med_ent.connect("activate",self.build_med_stats)
 		self.stat_all_ent.connect("activate",self.build_all_stats)
 
-		self.del_button.connect("clicked",self.del_volk)
-		self.add_button.connect("clicked",self.add_volk)
+		self.del_button.connect("clicked",self.del_comb)
+		self.add_button.connect("clicked",self.add_comb)
 		self.add_food_button.connect("clicked",self.add_food)
 		self.add_med_button.connect("clicked",self.add_med)
 
@@ -671,7 +671,7 @@ class MainController(object):
 		b.get_object("imagemenuitem2").connect("activate",self.import_from_file)
 		b.get_object("imagemenuitem11").connect("activate",self.export_data)
 
-		self.kill_volk_button.connect("clicked",self.kill_volk)
+		self.kill_comb_button.connect("clicked",self.kill_comb)
 
 		queen_bee_color_this_year = b.get_object("queen_bee_color_this_year")
 		queen_bee_year_select = b.get_object("queen_bee_year_select")
@@ -765,7 +765,7 @@ class MainController(object):
 		self.t1_model= t1_model
 		treeview.set_model(t1_model)
 		self.t1=treeview
-		if(self.volksverwaltung != None):
+		if(self.combDB != None):
 			self.build_t1_model()
 	def build_treeview2(self,treeview):
 		t2_renderer1=Gtk.CellRendererText()
@@ -824,17 +824,17 @@ class MainController(object):
 		treeview.set_model(t4_model)
 		self.t4=treeview
 		self.t4_model= t4_model
-	def load_volksverwaltung(self):
-		volksverwaltung=None
+	def load_combDB(self):
+		combDB=None
 		try:
-			volksverwaltung=pickle.load(open(self.savename,"rb"))
+			combDB=pickle.load(open(self.savename,"rb"))
 		except BaseException as e:
 			print(e)
-		if(volksverwaltung==None):
-			volksverwaltung=Volksverwaltung()
-			volksverwaltung.add_volk(Volk("TestVolk","Haus",10))
-		self.volksverwaltung= volksverwaltung
-		self.volksverwaltung.update_current_version()
+		if(combDB==None):
+			combDB=CombDB()
+			combDB.add_comb(Comb("TestComb","Haus",10))
+		self.combDB= combDB
+		self.combDB.update_current_version()
 		
 
 class InformationController(object):
@@ -983,15 +983,15 @@ class StockInformationController(object):
 		model,row=sel.get_selected()
 		place=0
 		vname=self.main_controller.t1_model[row][0]
-		for volk in self.main_controller.volksverwaltung.voelker:
-			if(volk.name==vname):
+		for comb in self.main_controller.combDB.combs:
+			if(comb.name==vname):
 				break
 			place+=1
 		if(not add_note):
-			self.main_controller.volksverwaltung.voelker[place].add_stock(
+			self.main_controller.combDB.combs[place].add_stock(
 					Stock(bees,food,brood,has_queen,drone_brood,today))
 		else:
-			self.main_controller.volksverwaltung.voelker[place].add_stock(
+			self.main_controller.combDB.combs[place].add_stock(
 					Stock(bees,food,brood,has_queen,drone_brood,today,note))
 	def do_plot_stocks(self,button):
 		if(self.plot_stocks.get_active()):
@@ -1043,24 +1043,24 @@ class StockInformationController(object):
 		model,row=sel.get_selected()
 		place=0
 		vname=self.main_controller.t1_model[row][0]
-		for volk in self.main_controller.volksverwaltung.voelker:
-			if(volk.name==vname):
+		for comb in self.main_controller.combDB.combs:
+			if(comb.name==vname):
 				break
 			place+=1
-		volk = self.main_controller.volksverwaltung.voelker[place]
+		comb = self.main_controller.combDB.combs[place]
 
 		_from = self.date_from_entry(self.stock_plot_from_entry)
 		_to = self.date_from_entry(self.stock_plot_to_entry)
 
 		stocks = []
 		if(_from == None and _to == None):
-			stocks = volk.all_stocks()
+			stocks = comb.all_stocks()
 		elif(_from == None and _to != None):
-			stocks = volk.stocks_until(_to)
+			stocks = comb.stocks_until(_to)
 		elif(_from != None and _to == None):
-			stocks = volk.stocks_from(_from)
+			stocks = comb.stocks_from(_from)
 		else:
-			stocks = volk.stocks_between(_from,_to)
+			stocks = comb.stocks_between(_from,_to)
 		x = [ i.date for i in stocks]
 		y = [getattr(i,i.values[to_plot]) for i in stocks]
 		y = self.reformat_for_plot(y)
@@ -1108,24 +1108,24 @@ class StockInformationController(object):
 		model,row=sel.get_selected()
 		place=0
 		vname=self.main_controller.t1_model[row][0]
-		for volk in self.main_controller.volksverwaltung.voelker:
-			if(volk.name==vname):
+		for comb in self.main_controller.combDB.combs:
+			if(comb.name==vname):
 				break
 			place+=1
-		volk = self.main_controller.volksverwaltung.voelker[place]
+		comb = self.main_controller.combDB.combs[place]
 
 		_from = self.date_from_entry(self.stock_plot_from_entry)
 		_to = self.date_from_entry(self.stock_plot_to_entry)
 
 		stocks = []
 		if(_from == None and _to == None):
-			stocks = volk.all_stocks()
+			stocks = comb.all_stocks()
 		elif(_from == None and _to != None):
-			stocks = volk.stocks_until(_to)
+			stocks = comb.stocks_until(_to)
 		elif(_from != None and _to == None):
-			stocks = volk.stocks_from(_from)
+			stocks = comb.stocks_from(_from)
 		else:
-			stocks = volk.stocks_between(_from,_to)
+			stocks = comb.stocks_between(_from,_to)
 
 		# build the show-dialog
 		print_builder = Gtk.Builder()

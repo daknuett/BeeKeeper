@@ -52,7 +52,7 @@ else:
 	abm.append(abd)
 
 maincontroller = MainController(w)
-maincontroller.load_volksverwaltung()
+maincontroller.load_combDB()
 maincontroller.build_from_builder(builder)
 
 
