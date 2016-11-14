@@ -11,13 +11,13 @@ class Spendable(object):
 	pass
 
 class Food(Spendable):
-	def __init__(self,name,amount,price_per_amount,datum):
+	def __init__(self,name,amount,price_per_amount,date):
 		self.name=name
 		self.amount=amount
 		self.price_per_amount=price_per_amount
-		self.datum=datum
+		self.date=date
 	def __str__(self):
-		s= self.name+": "+str(self.amount)+" Einheiten mit "+str(self.price_per_amount)+" Euro per Einheit am "+str(self.datum)+" gefüttert"
+		s= self.name+": "+str(self.amount)+" Einheiten mit "+str(self.price_per_amount)+" Euro per Einheit am "+str(self.date)+" gefüttert"
 		return s
 	def __add__(self,obj):
 		return self.amount*self.price_per_amount + obj
@@ -30,31 +30,31 @@ class Food(Spendable):
 			"""
 		xml_str=""
 		xml_str+="\t"*indent
-		xml_str+='<futter name="{0}">\n'.format(self.name)
+		xml_str+='<food name="{0}">\n'.format(self.name)
 		xml_str+="\t"*(indent+1)
 		xml_str+='<perperty name="{0}">{1}</perperty>\n'.format("amount",self.amount)
 		xml_str+="\t"*(indent+1)
 		xml_str+='<perperty name="{0}">{1}</perperty>\n'.format("price_per_amount",self.price_per_amount)
 		xml_str+="\t"*(indent+1)
-		xml_str+='<perperty name="{0}">{1}</perperty>\n'.format("datum",self.datum)
+		xml_str+='<perperty name="{0}">{1}</perperty>\n'.format("date",self.date)
 		xml_str+="\t"*indent
-		xml_str+='</futter>\n'
+		xml_str+='</food>\n'
 		return xml_str
 	def to_csv(self,separator=','):
 		csv_str=""
-		csv_str+="futter{0}{1}{0}{2}{0}{3}\n".format(separator,self.name,self.amount,self.price_per_amount)
+		csv_str+="food{0}{1}{0}{2}{0}{3}\n".format(separator,self.name,self.amount,self.price_per_amount)
 		return csv_str
 
 
 	
 class Medicine(Spendable):
-	def __init__(self,name,amount,price_per_amount,datum):
+	def __init__(self,name,amount,price_per_amount,date):
 		self.name=name
 		self.amount=amount/1000
 		self.price_per_amount=price_per_amount
-		self.datum=datum
+		self.date=date
 	def __str__(self):
-		s= self.name+": "+str(self.amount)+" Einheiten mit "+str(self.price_per_amount)+" Euro per Einheit am "+str(self.datum)+" verabreicht"
+		s= self.name+": "+str(self.amount)+" Einheiten mit "+str(self.price_per_amount)+" Euro per Einheit am "+str(self.date)+" verabreicht"
 		return s
 	def __add__(self,obj):
 		return self.amount*self.price_per_amount + obj
@@ -66,19 +66,19 @@ class Medicine(Spendable):
 			"""
 		xml_str=""
 		xml_str+="\t"*indent
-		xml_str+='<medikament name="{0}">\n'.format(self.name)
+		xml_str+='<drug name="{0}">\n'.format(self.name)
 		xml_str+="\t"*(indent+1)
 		xml_str+='<perperty name="{0}">{1}</perperty>\n'.format("amount",self.amount)
 		xml_str+="\t"*(indent+1)
 		xml_str+='<perperty name="{0}">{1}</perperty>\n'.format("price_per_amount",self.price_per_amount)
 		xml_str+="\t"*(indent+1)
-		xml_str+='<perperty name="{0}">{1}</perperty>\n'.format("datum",self.datum)
+		xml_str+='<perperty name="{0}">{1}</perperty>\n'.format("date",self.date)
 		xml_str+="\t"*indent
-		xml_str+='</medikament>\n'
+		xml_str+='</drug>\n'
 		return xml_str
 	def to_csv(self,separator=','):
 		csv_str=""
-		csv_str+="medikament{0}{1}{0}{2}{0}{3}\n".format(separator,self.name,self.amount,self.price_per_amount)
+		csv_str+="drug{0}{1}{0}{2}{0}{3}\n".format(separator,self.name,self.amount,self.price_per_amount)
 		return csv_str
 
 class Comb(object):
@@ -86,8 +86,8 @@ class Comb(object):
 		self.name = name
 		self.ort = ort
 		self.groesse = groesse
-		self.futterlist = []
-		self.medikamentenlist = []
+		self.foodlist = []
+		self.druglist = []
 		self.old_groesse = []
 		self.sizes = []
 		self.dead = False
@@ -97,22 +97,22 @@ class Comb(object):
 			"groesse":"groesse",
 			"tot":"dead",
 			"todesursache":"death_reason",
-			"sterbedatum":"death_date"}
+			"sterbedate":"death_date"}
 		self.notes = []
 		self.dates = []
 	def __str__(self):
 		return self.name+": steht in "+self.ort+" ist "+str(self.groesse)+" Rähmchen groß"
-	def feed(self,futter):
-		self.futterlist.append(futter)
+	def feed(self,food):
+		self.foodlist.append(food)
 	def is_dead(self):
 		self.update_current_version()
 		return self.dead
-	def apply_drug(self,medikament):
-		self.medikamentenlist.append(medikament)
+	def apply_drug(self,drug):
+		self.druglist.append(drug)
 	def change_size_by_date(self,date,size):
-		for futter in self.futterlist:
-			if(futter.datum==datetime.datetime.strptime(date,"%d-%m-%y").date()):
-				futter.amount=size
+		for food in self.foodlist:
+			if(food.date==datetime.datetime.strptime(date,"%d-%m-%y").date()):
+				food.amount=size
 	def update_current_version(self):
 		""" add missing attributes of older versions """
 		if(not hasattr(self,"dead")):
@@ -130,7 +130,7 @@ class Comb(object):
 				"groesse":"groesse",
 				"tot":"dead",
 				"todesursache":"death_reason",
-				"sterbedatum":"death_date"}
+				"sterbedate":"death_date"}
 		if(not hasattr(self,"sizes")):
 			self.old_groesse = [(datetime.datetime.today(),self.groesse)]
 			self.sizes = []
@@ -144,9 +144,9 @@ class Comb(object):
 		for name,entity in self.xml_values.items():
 			xml_str+="\t"*(indent+1)
 			xml_str+='<perperty name="{0}">{1}</perperty>\n'.format(name,getattr(self,entity))
-		for futter in self.futterlist:
-			xml_str+=futter.to_xml(indent+1)
-		for med in self.medikamentenlist:
+		for food in self.foodlist:
+			xml_str+=food.to_xml(indent+1)
+		for med in self.druglist:
 			xml_str+=med.to_xml(indent+1)
 		xml_str+="\t"*indent
 		xml_str+="</comb>\n"
@@ -155,12 +155,12 @@ class Comb(object):
 		self.update_current_version()
 		"""unlike Food.to_csv or Medicine.to_csv this will write everyting to a file"""
 		_name=pathspec+self.name.replace(" ","_")
-		foods=open(_name+"_futter.csv","w")
-		for futter in self.futterlist:
-			foods.write(futter.to_csv(separator))
+		foods=open(_name+"_food.csv","w")
+		for food in self.foodlist:
+			foods.write(food.to_csv(separator))
 		foods.close()
 		meds=open(_name+"_med.csv","w")
-		for med in self.medikamentenlist:
+		for med in self.druglist:
 			meds.write(med.to_csv(separator))
 		meds.close()
 		csv_str = "comb"
@@ -209,12 +209,12 @@ class Stock(object):
 		self.note = note
 		self.date = date
 		self.values = {"bienen":"bees",
-			"futter":"food",
+			"food":"food",
 			"brut":"brood",
 			"dronenbrut":"drone_brood",
 			"koenigin":"queen_bee",
 			"notiz":"note",
-			"datum":"date"}
+			"date":"date"}
 	def __str__(self):
 		return "Stock({},{},{},{},{},{},{})".format(repr(self.bees), repr(self.food), repr(self.brood), repr(self.queen_bee), repr(self.drone_brood), repr(self.date), repr(self.note))
 	def __repr__(self):
@@ -507,15 +507,15 @@ class MainController(object):
 			if(comb.name==vname):
 				break
 			place+=1
-		meds=self.combDB.combs[place].medikamentenlist
-		foods=self.combDB.combs[place].futterlist
+		meds=self.combDB.combs[place].druglist
+		foods=self.combDB.combs[place].foodlist
 		stat_foods=[]
-		for futter in foods:
-			if(futter.datum>=da):
-				stat_foods.append(futter)
+		for food in foods:
+			if(food.date>=da):
+				stat_foods.append(food)
 		stat_meds=[]
 		for med in meds:
-			if(med.datum>=da):
+			if(med.date>=da):
 				stat_meds.append(med)
 		all_stats=stat_foods+stat_meds
 		for stat in all_stats:
@@ -547,14 +547,14 @@ class MainController(object):
 				break
 			place+=1
 		self.food_stats_comb_index=place
-		foods = self.combDB.combs[place].futterlist
+		foods = self.combDB.combs[place].foodlist
 		stat_foods = []
-		for futter in foods:
-			if(futter.datum>=da):
-				stat_foods.append(futter)
+		for food in foods:
+			if(food.date>=da):
+				stat_foods.append(food)
 		self.stat_foods = stat_foods
 		for food in stat_foods:
-			self.t2_model.append((food.name,food.price_per_amount,food.amount,food.datum.strftime("%d-%m-%y")))
+			self.t2_model.append((food.name,food.price_per_amount,food.amount,food.date.strftime("%d-%m-%y")))
 	def show_med_stats(self,dfrom):
 		self.t3_model=Gtk.ListStore(str,float,float,str)
 		self.t3.set_model(self.t3_model)
@@ -578,13 +578,13 @@ class MainController(object):
 			if(comb.name==vname):
 				break
 			place+=1
-		meds=self.combDB.combs[place].medikamentenlist
+		meds=self.combDB.combs[place].druglist
 		stat_meds=[]
 		for med in meds:
-			if(med.datum>=da):
+			if(med.date>=da):
 				stat_meds.append(med)
 		for med in stat_meds:
-			self.t3_model.append((med.name,med.price_per_amount,med.amount,med.datum.strftime("%d-%m-%y")))
+			self.t3_model.append((med.name,med.price_per_amount,med.amount,med.date.strftime("%d-%m-%y")))
 		return
 
 	def make_backup(self,*args):
@@ -1003,12 +1003,12 @@ class StockInformationController(object):
 	def _plot_stocks(self):
 		"""
 		Stock.values = {"bienen":"bees",
-			"futter":"food",
+			"food":"food",
 			"brut":"brood",
 			"dronenbrut":"drone_brood",
 			"koenigin":"queen_bee",
 			"notiz":"note",
-			"datum":"date"}
+			"date":"date"}
 
 			"""
 		try:
@@ -1025,8 +1025,8 @@ class StockInformationController(object):
 			print("bienen")
 			to_plot = "bienen"
 		if(self.plot_food_enable.get_active()):
-			print("futter")
-			to_plot = "futter"
+			print("food")
+			to_plot = "food"
 		if(self.plot_queen_bee_enable.get_active()):
 			print("koenigin")
 			to_plot = "koenigin"
@@ -1082,19 +1082,19 @@ class StockInformationController(object):
 	def _print_stocks(self):
 		"""
 		Stock.values = {"bienen":"bees",
-			"futter":"food",
+			"food":"food",
 			"brut":"brood",
 			"dronenbrut":"drone_brood",
 			"koenigin":"queen_bee",
 			"notiz":"note",
-			"datum":"date"}
+			"date":"date"}
 
 			"""
-		to_print = ["datum"]
+		to_print = ["date"]
 		if(self.print_bees_enable.get_active()):
 			to_print.append("bienen")
 		if(self.print_food_enable.get_active()):
-			to_print.append("futter")
+			to_print.append("food")
 		if(self.print_queen_bee_enable.get_active()):
 			to_print.append("koenigin")
 		if(self.print_drone_brood_enable.get_active()):
